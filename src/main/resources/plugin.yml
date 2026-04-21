@@ -1,0 +1,10 @@
+name: Hopplet
+description: $description
+version: '$version'
+
+main: au.lupine.hopplet.Hopplet
+api-version: '1.21.11'
+load: POSTWORLD
+
+authors: [ jwkerr ]
+website: https://lupine.au
