@@ -204,8 +204,6 @@ public final class FilterEditListener implements Listener {
                                     String input = view.getText("filter_input");
                                     if (input == null) return;
 
-                                    if (input.equals(text)) return;
-
                                     confirm.accept(input);
                                 }, ClickCallback.Options.builder()
                                     .uses(1)
@@ -219,6 +217,7 @@ public final class FilterEditListener implements Listener {
                             ))
                             .build()
                     ))
+                .columns(3)
                 .build()
             )
         );
