@@ -231,7 +231,7 @@ public final class FilterEditListener implements Listener {
 
     // https://github.com/PaperMC/Paper/issues/12971
     private @NonNull Component translate(@NonNull Player player, @NonNull String key) {
-        return GlobalTranslator.render(Component.translatable(key), player.locale());
+        return translate(player, Component.translatable(key));
     }
 
     private @NonNull Component translate(@NonNull Player player, @NonNull Component component) {
