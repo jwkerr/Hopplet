@@ -4,9 +4,9 @@ import org.jspecify.annotations.NonNull;
 
 public enum Comparator {
 
-    EQUAL_TO("="),
     LESS_THAN_OR_EQUAL_TO("<="),
     GREATER_THAN_OR_EQUAL_TO(">="),
+    EQUAL_TO("="),
     LESS_THAN("<"),
     GREATER_THAN(">");
 
