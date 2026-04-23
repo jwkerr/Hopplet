@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
 public final class Filter {
 
     private final @NonNull Node root;
+    private final @NonNull String raw;
 
-    private Filter(@NonNull Node root) {
+    private Filter(@NonNull Node root, @NonNull String raw) {
         this.root = root;
+        this.raw = raw;
     }
 
     /// @return `true` if the filter accepts the item in the specified {@link Context}.
@@ -43,7 +45,7 @@ public final class Filter {
             List<Token> tokens = Tokeniser.tokenise(raw);
             Node root = new Parser(tokens).parse();
 
-            return new Filter(root);
+            return new Filter(root, raw);
         }
 
         public static @Nullable Filter compile(@Nullable Component component) throws FilterCompileException {
@@ -347,6 +349,16 @@ public final class Filter {
         public static final Map<BlockKey, Filter> BLOCK_CACHE = new ConcurrentHashMap<>();
         public static final Map<UUID, Filter> ENTITY_CACHE = new ConcurrentHashMap<>();
 
+        /// @return List of all cached filters.
+        public static @NonNull List<Filter> filters() {
+            List<Filter> filters = new ArrayList<>();
+
+            filters.addAll(BLOCK_CACHE.values());
+            filters.addAll(ENTITY_CACHE.values());
+
+            return filters;
+        }
+
         public static void cache(@NonNull BlockKey key, @NonNull Filter filter) {
             BLOCK_CACHE.put(key, filter);
         }
@@ -508,5 +520,10 @@ public final class Filter {
                 return this;
             }
         }
+    }
+
+    @Override
+    public @NonNull String toString() {
+        return raw;
     }
 }
