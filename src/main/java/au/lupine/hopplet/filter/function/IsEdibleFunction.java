@@ -53,7 +53,7 @@ public final class IsEdibleFunction implements Function<Function.NoArguments> {
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull NoArguments compiled) {
+    public boolean test(Filter.@NonNull Context context, Function.@NonNull NoArguments arguments) {
         return context.stack().getType().isEdible();
     }
 }

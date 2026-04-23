@@ -6,29 +6,30 @@ import au.lupine.hopplet.filter.Function;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Set;
 
-public final class IsEnchantedFunction implements Function<Function.NoArguments> {
+public final class IsStackableFunction implements Function<Function.NoArguments> {
 
     @Override
     public @NonNull String name() {
-        return "is_enchanted";
+        return "is_stackable";
     }
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("enchanted");
+        return Set.of(
+            "stackable",
+            "can_stack"
+        );
     }
 
     @Override
     public @NonNull Component description() {
-        return Component.translatable("hopplet.filter.function.is_enchanted.description");
+        return Component.translatable("hopplet.filter.function.is_stackable.description");
     }
 
     @Override
@@ -52,10 +53,6 @@ public final class IsEnchantedFunction implements Function<Function.NoArguments>
 
     @Override
     public boolean test(Filter.@NonNull Context context, Function.@NonNull NoArguments arguments) {
-        ItemStack item = context.stack();
-
-        if (!item.getEnchantments().isEmpty()) return true;
-
-        return item.getItemMeta() instanceof EnchantmentStorageMeta meta && !meta.getStoredEnchants().isEmpty();
+        return context.stack().getType().getMaxStackSize() > 1;
     }
 }
