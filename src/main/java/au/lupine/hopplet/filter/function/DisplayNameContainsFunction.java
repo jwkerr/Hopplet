@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DisplayNameContainsFunction implements Function<Set<String>> {
+public final class DisplayNameContainsFunction implements Function<Set<String>> {
 
     @Override
     public @NonNull String name() {

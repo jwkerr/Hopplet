@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MaterialStartsWithFunction implements Function<Set<String>> {
+public final class MaterialStartsWithFunction implements Function<Set<String>> {
 
     @Override
     public @NonNull String name() {
