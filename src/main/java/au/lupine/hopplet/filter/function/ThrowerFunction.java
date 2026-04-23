@@ -6,6 +6,8 @@ import au.lupine.hopplet.filter.Function;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Item;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
@@ -15,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public final class ThrowerFunction implements Function<Set<UUID>> {
+public final class ThrowerFunction implements Function<Set<String>> {
 
     @Override
     public @NonNull String name() {
@@ -38,7 +40,7 @@ public final class ThrowerFunction implements Function<Set<UUID>> {
     }
 
     @Override
-    public @NonNull Set<UUID> compile(@NonNull List<String> arguments) throws FilterCompileException {
+    public @NonNull Set<String> compile(@NonNull List<String> arguments) throws FilterCompileException {
         if (arguments.isEmpty()) {
             throw new FilterCompileException(
                 Component.translatable(
@@ -48,31 +50,29 @@ public final class ThrowerFunction implements Function<Set<UUID>> {
             );
         }
 
-        Set<UUID> uuids = new HashSet<>();
-        for (String argument : arguments) {
-            try {
-                uuids.add(UUID.fromString(argument));
-            } catch (IllegalArgumentException e) {
-                throw new FilterCompileException(
-                    Component.translatable(
-                        "hopplet.filter.function.thrower.compilation.exception.invalid_uuid",
-                        Argument.string("input", argument)
-                    )
-                );
-            }
-        }
-
-        return uuids;
+        return new HashSet<>(arguments);
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<UUID> uuids) {
+    public boolean test(Filter.@NonNull Context context, @NonNull Set<String> arguments) {
         Item item = context.item();
         if (item == null) return false;
 
         UUID thrower = item.getThrower();
         if (thrower == null) return false;
 
-        return uuids.contains(thrower);
+        for (String argument : arguments) {
+            try {
+                UUID uuid = UUID.fromString(argument);
+                if (thrower.equals(uuid)) return true;
+            } catch (IllegalArgumentException e) {
+                OfflinePlayer player = Bukkit.getOfflinePlayerIfCached(argument);
+                if (player == null) continue;
+
+                return thrower.equals(player.getUniqueId());
+            }
+        }
+
+        return false;
     }
 }
