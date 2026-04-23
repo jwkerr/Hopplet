@@ -3,7 +3,10 @@ package au.lupine.hopplet.listener;
 import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.minecart.HopperMinecart;
@@ -15,22 +18,38 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Collection;
-import java.util.UUID;
+import java.util.Map;
 
+@NullMarked
 public final class FilterCacheListener implements Listener {
 
-    private void invalidate(@NonNull Collection<Block> blocks) {
-        blocks.forEach(block -> {
-            if (block.getType() == Material.HOPPER) Filter.Cache.invalidate(block);
-        });
+    private void invalidate(final World world, Collection<Block> blocks) {
+        final Map<Long, AbstractInt2ObjectMap<Filter>> worldChunkCache = Filter.Cache.BLOCK_CACHE.get(world.getUID());
+        if (worldChunkCache == null) {
+            return;
+        }
+
+        for (final Block block : blocks) {
+            if (block.getType() != Material.HOPPER) {
+                continue;
+            }
+
+            final AbstractInt2ObjectMap<Filter> chunkCache = worldChunkCache.get(Chunk.getChunkKey(block.getX() >> 4, block.getZ() >> 4));
+            if (chunkCache == null) {
+                continue;
+            }
+
+            chunkCache.remove(Filter.Cache.packChunkRelativeCoords(block.getX(), block.getY(), block.getZ()));
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(@NonNull BlockPlaceEvent event) {
+    public void on(BlockPlaceEvent event) {
         if (!(event.getBlock().getState(false) instanceof Hopper hopper)) return;
 
         Filter filter;
@@ -46,12 +65,12 @@ public final class FilterCacheListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(@NonNull BlockBreakEvent event) {
+    public void on(BlockBreakEvent event) {
         if (event.getBlock().getType() == Material.HOPPER) Filter.Cache.invalidate(event.getBlock());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(@NonNull EntityPlaceEvent event) {
+    public void on(EntityPlaceEvent event) {
         if (!(event.getEntity() instanceof HopperMinecart hopper)) return;
 
         Filter filter;
@@ -67,23 +86,31 @@ public final class FilterCacheListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(@NonNull EntityRemoveFromWorldEvent event) {
+    public void on(EntityRemoveFromWorldEvent event) {
         if (event.getEntity() instanceof HopperMinecart hopper) Filter.Cache.invalidate(hopper);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(@NonNull BlockExplodeEvent event) {
-        invalidate(event.blockList());
+    public void on(BlockExplodeEvent event) {
+        invalidate(event.getBlock().getWorld(), event.blockList());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(@NonNull EntityExplodeEvent event) {
-        invalidate(event.blockList());
+    public void on(EntityExplodeEvent event) {
+        invalidate(event.getEntity().getWorld(), event.blockList());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(@NonNull WorldUnloadEvent event) {
-        UUID uuid = event.getWorld().getUID();
-        Filter.Cache.BLOCK_CACHE.keySet().removeIf(key -> key.world().equals(uuid));
+    public void on(WorldUnloadEvent event) {
+        Filter.Cache.BLOCK_CACHE.remove(event.getWorld().getUID());
+    }
+
+    @EventHandler
+    public void cleanupBlockFilterCache(final ChunkUnloadEvent event) {
+        final Map<Long, ?> worldChunkCache = Filter.Cache.BLOCK_CACHE.get(event.getWorld().getUID());
+        if (worldChunkCache != null) {
+            final Chunk chunk = event.getChunk();
+            worldChunkCache.remove(Chunk.getChunkKey(chunk.getX(), chunk.getZ()));
+        }
     }
 }
