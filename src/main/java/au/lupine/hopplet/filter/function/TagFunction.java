@@ -13,11 +13,12 @@ import org.bukkit.Tag;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class TagFunction implements Function<Set<Tag<Material>>> {
+public final class TagFunction implements Function<Set<Material>> {
 
     @Override
     public @NonNull String name() {
@@ -40,7 +41,7 @@ public final class TagFunction implements Function<Set<Tag<Material>>> {
     }
 
     @Override
-    public @NonNull Set<Tag<Material>> compile(@NonNull List<String> arguments) throws FilterCompileException {
+    public @NonNull Set<Material> compile(@NonNull List<String> arguments) throws FilterCompileException {
         if (arguments.isEmpty()) {
             throw new FilterCompileException(
                 Component.translatable(
@@ -50,9 +51,9 @@ public final class TagFunction implements Function<Set<Tag<Material>>> {
             );
         }
 
-        Set<Tag<Material>> tags = new HashSet<>();
+        Set<Material> materials = EnumSet.noneOf(Material.class);
         for (String argument : arguments) {
-            NamespacedKey key = NamespacedKey.fromString(argument);
+            NamespacedKey key = NamespacedKey.fromString(argument.toLowerCase());
 
             if (key == null) {
                 throw new FilterCompileException(
@@ -75,20 +76,14 @@ public final class TagFunction implements Function<Set<Tag<Material>>> {
                 );
             }
 
-            tags.add(tag);
+            materials.addAll(tag.getValues());
         }
 
-        return tags;
+        return materials;
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<Tag<Material>> tags) {
-        Material type = context.stack().getType();
-
-        for (Tag<Material> tag : tags) {
-            if (tag.isTagged(type)) return true;
-        }
-
-        return false;
+    public boolean test(Filter.@NonNull Context context, @NonNull Set<Material> materials) {
+        return materials.contains(context.stack().getType());
     }
 }
