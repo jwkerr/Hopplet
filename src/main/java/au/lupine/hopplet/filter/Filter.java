@@ -1,10 +1,12 @@
 package au.lupine.hopplet.filter;
 
 import au.lupine.hopplet.filter.exception.FilterCompileException;
-import au.lupine.hopplet.util.BlockKey;
+import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Range;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -344,75 +347,99 @@ public final class Filter {
 
     public static final class Cache {
 
-        public static final Map<BlockKey, Filter> BLOCK_CACHE = new ConcurrentHashMap<>();
+        // Using multiple nested maps allows invalidating a full world/chunk at once, doubt there's any noticeable difference in lookup speed
+        // an important assumption is that only the region thread responsible for the chunk will access the final int to object map
+        public static final Map<UUID, Map<Long, AbstractInt2ObjectMap<Filter>>> BLOCK_CACHE = new ConcurrentHashMap<>();
         public static final Map<UUID, Filter> ENTITY_CACHE = new ConcurrentHashMap<>();
 
-        /// @return List of all cached filters.
-        public static @NonNull List<Filter> filters() {
-            List<Filter> filters = new ArrayList<>();
+        private static final java.util.function.Function<UUID, Map<Long, AbstractInt2ObjectMap<Filter>>> NEW_WORLD_CHUNK_MAP = ignored -> new ConcurrentHashMap<>();
+        private static final java.util.function.Function<Long, AbstractInt2ObjectMap<Filter>> NEW_CHUNK_MAP = ignored -> new Int2ObjectOpenHashMap<>();
 
-            filters.addAll(BLOCK_CACHE.values());
-            filters.addAll(ENTITY_CACHE.values());
+        // Generic methods
 
-            return filters;
+        public static void cache(final UUID worldUUID, final int x, final int y, final int z, final Filter filter) {
+            BLOCK_CACHE
+                    .computeIfAbsent(worldUUID, NEW_WORLD_CHUNK_MAP)
+                    .computeIfAbsent(Chunk.getChunkKey(x >> 4, z >> 4), NEW_CHUNK_MAP)
+                    .put(packChunkRelativeCoords(x, y, z), filter);
         }
 
-        public static void cache(@NonNull BlockKey key, @NonNull Filter filter) {
-            BLOCK_CACHE.put(key, filter);
+        private static @Nullable AbstractInt2ObjectMap<Filter> getChunkFilterMap(final UUID worldUUID, final int x, final int z) {
+            final Map<Long, AbstractInt2ObjectMap<Filter>> chunkMap = BLOCK_CACHE.get(worldUUID);
+            if (chunkMap == null) return null;
+
+            return chunkMap.get(Chunk.getChunkKey(x >> 4, z >> 4));
         }
 
-        public static @Nullable Filter get(@NonNull BlockKey key) {
-            return BLOCK_CACHE.get(key);
+        public static @Nullable Filter get(final UUID worldUUID, final int x, final int y, final int z) {
+            final AbstractInt2ObjectMap<Filter> filterMap = getChunkFilterMap(worldUUID, x, z);
+            if (filterMap == null) return null;
+
+            return filterMap.get(packChunkRelativeCoords(x, y, z));
         }
 
-        public static void invalidate(@NonNull BlockKey key) {
-            BLOCK_CACHE.remove(key);
+        public static void invalidate(final UUID worldUUID, final int x, final int y, final int z){
+            final AbstractInt2ObjectMap<Filter> filterMap = getChunkFilterMap(worldUUID, x, z);
+            if (filterMap != null) filterMap.remove(packChunkRelativeCoords(x, y, z));
         }
+
+        // Location methods
 
         public static void cache(@NonNull Location location, @NonNull Filter filter) {
-            cache(BlockKey.of(location), filter);
+            cache(location.getWorld().getUID(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), filter);
         }
 
         public static @Nullable Filter get(@NonNull Location location) {
-            return get(BlockKey.of(location));
+            return get(location.getWorld().getUID(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
         }
 
         public static void invalidate(@NonNull Location location) {
-            invalidate(BlockKey.of(location));
+            invalidate(location.getWorld().getUID(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
         }
 
+        // Block methods
+
         public static void cache(@NonNull Block block, @NonNull Filter filter) {
-            cache(block.getLocation(), filter);
+            cache(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ(), filter);
         }
 
         public static @Nullable Filter get(@NonNull Block block) {
-            return get(block.getLocation());
+            return get(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
         }
 
         public static void invalidate(@NonNull Block block) {
-            invalidate(block.getLocation());
+            invalidate(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
         }
 
         public static void cache(@NonNull Hopper hopper, @NonNull Filter filter) {
-            cache(hopper.getLocation(), filter);
+            cache(hopper.getWorld().getUID(), hopper.getX(), hopper.getY(), hopper.getZ(), filter);
         }
 
         public static @Nullable Filter get(@NonNull Hopper hopper) {
-            return get(hopper.getLocation());
+            return get(hopper.getWorld().getUID(), hopper.getX(), hopper.getY(), hopper.getZ());
         }
 
         public static @Nullable Filter getOrCompile(@NonNull Hopper hopper) throws FilterCompileException {
-            Filter filter = get(hopper);
+            final AbstractInt2ObjectMap<Filter> map = BLOCK_CACHE
+                    .computeIfAbsent(hopper.getWorld().getUID(), NEW_WORLD_CHUNK_MAP)
+                    .computeIfAbsent(Chunk.getChunkKey(hopper.getX() >> 4, hopper.getZ() >> 4), NEW_CHUNK_MAP);
+
+            final int packed = packChunkRelativeCoords(hopper.getX(), hopper.getY(), hopper.getZ());
+
+            Filter filter = map.get(packed);
             if (filter != null) return filter;
 
             Filter compiled = Filter.Compiler.compile(hopper);
-            if (compiled != null) cache(hopper, compiled);
+            if (compiled != null) map.put(packed, compiled);
+
             return compiled;
         }
 
         public static void invalidate(@NonNull Hopper hopper) {
-            invalidate(hopper.getLocation());
+            invalidate(hopper.getWorld().getUID(), hopper.getX(), hopper.getY(), hopper.getZ());
         }
+
+        // Hopper minecart methods
 
         public static void cache(@NonNull UUID uuid, @NonNull Filter filter) {
             ENTITY_CACHE.put(uuid, filter);
@@ -440,11 +467,26 @@ public final class Filter {
 
             Filter compiled = Filter.Compiler.compile(hopper);
             if (compiled != null) cache(hopper, compiled);
+
             return compiled;
         }
 
         public static void invalidate(@NonNull HopperMinecart hopper) {
             invalidate(hopper.getUniqueId());
+        }
+
+        /**
+         * Packs chunk relative x and z coords and the y coordinate into a single integer.
+         *
+         * @param x The world or chunk relative x coordinate.
+         * @param y The world relative y coordinate, the maximum supported range is from 2^23 - 1 to -2^23
+         * @param z The world or chunk relative z coordinate.
+         * @return A packed integer that uniquely identifies these coords in a chunk.
+         */
+        public static int packChunkRelativeCoords(final int x, @Range(from = -8_388_608, to = 8_388_607) final int y, final int z) {
+            return x & 0xF // mask x and z with 0xF (15) to ensure they are within range
+                    | (z & 0xF) << 4 // z is put into the next 4 bits
+                    | (y & 0xFFFFFF) << 8; // and y is put into the remaining 24 bits after x and z
         }
     }
 
