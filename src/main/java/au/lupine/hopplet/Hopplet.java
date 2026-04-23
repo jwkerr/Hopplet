@@ -35,6 +35,7 @@ public final class Hopplet extends JavaPlugin {
         );
 
         Function.register(
+            new BookAuthorFunction(),
             new DisplayNameContainsFunction(),
             new DisplayNameEndsWithFunction(),
             new DisplayNameFunction(),
