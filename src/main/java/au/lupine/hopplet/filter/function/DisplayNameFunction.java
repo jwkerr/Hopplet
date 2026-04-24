@@ -52,8 +52,7 @@ public final class DisplayNameFunction implements Function<Set<String>> {
 
     @Override
     public boolean test(Filter.@NonNull Context context, @NonNull Set<String> arguments) {
-        String name = PlainTextComponentSerializer.plainText().serialize(context.stack().displayName());
-        name = name.substring(1, name.length() - 1);
+        final String name = PlainTextComponentSerializer.plainText().serialize(context.stack().effectiveName());
 
         return arguments.contains(name);
     }

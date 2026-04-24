@@ -52,8 +52,7 @@ public final class DisplayNameStartsWithFunction implements Function<Set<String>
 
     @Override
     public boolean test(Filter.@NonNull Context context, @NonNull Set<String> arguments) {
-        String name = PlainTextComponentSerializer.plainText().serialize(context.stack().displayName());
-        name = name.substring(1, name.length() - 1);
+        final String name = PlainTextComponentSerializer.plainText().serialize(context.stack().effectiveName());
 
         for (String argument : arguments) {
             if (name.startsWith(argument)) return true;
