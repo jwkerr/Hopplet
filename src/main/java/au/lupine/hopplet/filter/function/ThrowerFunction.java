@@ -4,6 +4,7 @@ import au.lupine.hopplet.Hopplet;
 import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
+import au.lupine.hopplet.util.Either;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.Bukkit;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public final class ThrowerFunction implements Function<Set<String>> {
+public final class ThrowerFunction implements Function<Set<Either<UUID, String>>> {
 
     @Override
     public @NonNull String name() {
@@ -40,7 +41,7 @@ public final class ThrowerFunction implements Function<Set<String>> {
     }
 
     @Override
-    public @NonNull Set<String> compile(@NonNull List<String> arguments) throws FilterCompileException {
+    public @NonNull Set<Either<UUID, String>> compile(@NonNull List<String> arguments) throws FilterCompileException {
         if (arguments.isEmpty()) {
             throw new FilterCompileException(
                 Component.translatable(
@@ -50,29 +51,68 @@ public final class ThrowerFunction implements Function<Set<String>> {
             );
         }
 
-        return new HashSet<>(arguments);
+        final Set<Either<UUID, String>> eithers = new HashSet<>();
+
+        for (final String argument : arguments) {
+            if (argument.length() == 36) {
+                try {
+                    eithers.add(Either.left(UUID.fromString(argument)));
+                    continue;
+                } catch (IllegalArgumentException ignored) {}
+            }
+
+            if (isReasonablePlayerName(argument)) {
+                eithers.add(Either.right(argument));
+                continue;
+            }
+
+            throw new FilterCompileException(
+                Component.translatable(
+                    "hopplet.filter.function.thrower.compilation.exception.invalid_name",
+                    Argument.string("input", argument)
+                )
+            );
+        }
+
+        return eithers;
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<String> arguments) {
+    public boolean test(Filter.@NonNull Context context, @NonNull Set<Either<UUID, String>> arguments) {
         Item item = context.item();
         if (item == null) return false;
 
         UUID thrower = item.getThrower();
         if (thrower == null) return false;
 
-        for (String argument : arguments) {
-            try {
-                UUID uuid = UUID.fromString(argument);
-                if (thrower.equals(uuid)) return true;
-            } catch (IllegalArgumentException e) {
-                OfflinePlayer player = Bukkit.getOfflinePlayerIfCached(argument);
-                if (player == null) continue;
-
-                return thrower.equals(player.getUniqueId());
+        for (Either<UUID, String> argument : arguments) {
+            if (argument.map(thrower::equals, name -> {
+                final OfflinePlayer player = Bukkit.getOfflinePlayerIfCached(name);
+                return player != null && thrower.equals(player.getUniqueId());
+            })) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    // Taken from paper inside net/minecraft/util/StringUtil
+    // does create a small problem for servers using floodgate, the default prefix '.' is already considered reasonable, but directly integrating with its api and retrieving the prefix from that is also possible if wanted.
+    private static boolean isReasonablePlayerName(final String name) {
+        if (name.isEmpty() || name.length() > 16) {
+            return false;
+        }
+
+        for (int i = 0, len = name.length(); i < len; ++i) {
+            final char c = name.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_' || c == '.')) {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }
