@@ -1,8 +1,5 @@
 package au.lupine.hopplet.base;
 
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslationStore;
@@ -76,15 +73,6 @@ public abstract class Plugin extends JavaPlugin {
 
     public @NonNull Map<String, Object> nodes() {
         return Map.of();
-    }
-
-    @SafeVarargs
-    public final void commands(@NonNull LiteralCommandNode<CommandSourceStack>... commands) {
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
-            for (LiteralCommandNode<CommandSourceStack> command : commands) {
-                event.registrar().register(command);
-            }
-        });
     }
 
     public final void listeners(@NonNull Listener... listeners) {

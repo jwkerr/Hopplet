@@ -8,6 +8,7 @@ import au.lupine.hopplet.filter.function.*;
 import au.lupine.hopplet.listener.FilterCacheListener;
 import au.lupine.hopplet.listener.FilterEditListener;
 import au.lupine.hopplet.listener.HopperInventoryListener;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.jspecify.annotations.NonNull;
 
 import java.util.LinkedHashMap;
@@ -22,7 +23,9 @@ public final class Hopplet extends Plugin {
     public void load() {
         instance = this;
 
-        commands(HoppletCommand.build());
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            commands.registrar().register(HoppletCommand.build(), List.of("hopper", "hopperfilter"));
+        });
     }
 
     @Override

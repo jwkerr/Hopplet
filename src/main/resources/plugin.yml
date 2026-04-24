@@ -26,12 +26,15 @@ permissions:
     description: Grants access to the Hopplet command.
     default: true
 
+  hopplet.command.hopplet.function:
+    description: Grants access to view Hopplet function info.
+    default: true
+
   hopplet.command.hopplet.reload:
     description: Grants access to the Hopplet reload command.
     default: op
 
 commands:
   hopplet:
-    description: "Command to interface with Hopplet"
-    usage: "/hopplet {argument}"
+    description: "Command to interface with Hopplet."
     permission: hopplet.command.hopplet
