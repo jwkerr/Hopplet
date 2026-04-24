@@ -14,7 +14,6 @@ import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
