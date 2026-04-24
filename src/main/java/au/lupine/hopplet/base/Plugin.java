@@ -39,6 +39,8 @@ public abstract class Plugin extends JavaPlugin {
 
     @Override
     public final void onEnable() {
+        config.reload();
+
         enable();
 
         PluginManager pm = this.getServer().getPluginManager();
@@ -64,9 +66,6 @@ public abstract class Plugin extends JavaPlugin {
 
     public void reload() {
         disable();
-
-        config.reload();
-
         enable();
     }
 
