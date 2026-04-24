@@ -9,4 +9,29 @@ load: POSTWORLD
 authors: [jwkerr]
 website: https://lupine.au
 
+contributors:
+  - Warriorrr # Helped by improving caching efficiency.
+
 folia-supported: true
+
+libraries:
+  - org.spongepowered:configurate-gson:4.2.0
+
+permissions:
+  hopplet.dialog.edit_filter.use:
+    description: Grants permission to open the filter editing dialog.
+    default: true
+
+  hopplet.command.hopplet:
+    description: Grants access to the Hopplet command.
+    default: true
+
+  hopplet.command.hopplet.reload:
+    description: Grants access to the Hopplet reload command.
+    default: op
+
+commands:
+  hopplet:
+    description: "Command to interface with Hopplet"
+    usage: "/hopplet {argument}"
+    permission: hopplet.command.hopplet

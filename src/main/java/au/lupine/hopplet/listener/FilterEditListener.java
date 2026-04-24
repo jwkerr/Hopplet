@@ -42,9 +42,11 @@ public final class FilterEditListener implements Listener {
 
     @EventHandler
     public void on(@NonNull PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        if (!player.hasPermission("hopplet.dialog.edit_filter.use")) return;
+
         if (!event.getAction().isRightClick()) return;
 
-        Player player = event.getPlayer();
         if (!player.isSneaking()) return;
 
         if (!player.getInventory().getItemInMainHand().isEmpty()) return;
@@ -101,9 +103,11 @@ public final class FilterEditListener implements Listener {
 
     @EventHandler
     public void on(@NonNull PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        if (!player.hasPermission("hopplet.dialog.edit_filter.use")) return;
+
         if (!(event.getRightClicked() instanceof HopperMinecart hopper)) return;
 
-        Player player = event.getPlayer();
         if (!player.isSneaking()) return;
 
         if (!player.getInventory().getItemInMainHand().isEmpty()) return;
@@ -177,7 +181,7 @@ public final class FilterEditListener implements Listener {
                 .inputs(List.of(
                     DialogInput.text("filter_input", translate(player, "hopplet.dialog.edit_filter.input.filter_input"))
                         .initial(text)
-                        .maxLength(512)
+                        .maxLength(Hopplet.instance().config().root().node("dialog", "input_length").getInt())
                         .width(300)
                         .multiline(TextDialogInput.MultilineOptions.create(null, 100))
                         .build()

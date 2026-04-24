@@ -357,6 +357,11 @@ public final class Filter {
 
         // Generic methods
 
+        public static void invalidate() {
+            BLOCK_CACHE.clear();
+            ENTITY_CACHE.clear();
+        }
+
         public static void cache(final UUID worldUUID, final int x, final int y, final int z, final Filter filter) {
             BLOCK_CACHE
                     .computeIfAbsent(worldUUID, NEW_WORLD_CHUNK_MAP)

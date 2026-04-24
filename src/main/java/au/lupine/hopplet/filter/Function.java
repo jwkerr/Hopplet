@@ -1,10 +1,12 @@
 package au.lupine.hopplet.filter;
 
+import au.lupine.hopplet.Hopplet;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +57,16 @@ public interface Function<ArgumentType> {
     }
 
     static void register(@NonNull Function<?>... functions) {
+        List<String> disabled;
+        try {
+            disabled = Hopplet.instance().config().root().node("functions", "disabled").getList(String.class, List.of());
+        } catch (SerializationException e) {
+            disabled = List.of();
+        }
+
         for (Function<?> function : functions) {
+            if (disabled.contains(function.namespaced())) return;
+
             for (Function<?> other : FUNCTIONS) {
                 if(other.namespaced().equals(function.namespaced())) return;
             }
