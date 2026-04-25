@@ -20,6 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -46,12 +47,24 @@ public final class HoppletCommand {
 
                     Entity entity = player.getTargetEntity(8, false);
                     if (entity instanceof HopperMinecart hopper) {
+                        BlockBreakEvent bbe = new BlockBreakEvent(hopper.getLocation().getBlock(), player);
+                        if (!bbe.callEvent()) {
+                            player.sendMessage(Component.translatable("hopplet.command.hopplet.edit.feedback.no_permission"));
+                            return 0;
+                        }
+
                         EditDialog.open(player, new HopperMinecartEditTarget(hopper));
                         return Command.SINGLE_SUCCESS;
                     }
 
                     Block block = player.getTargetBlockExact(8);
                     if (block != null && block.getState() instanceof Hopper hopper) {
+                        BlockBreakEvent bbe = new BlockBreakEvent(hopper.getBlock(), player);
+                        if (!bbe.callEvent()) {
+                            player.sendMessage(Component.translatable("hopplet.command.hopplet.edit.feedback.no_permission"));
+                            return 0;
+                        }
+
                         EditDialog.open(player, new HopperEditTarget(hopper));
                         return Command.SINGLE_SUCCESS;
                     }
