@@ -29,12 +29,16 @@ public final class Hopplet extends Plugin {
 
     @Override
     public void enable() {
-        if (!config().root().node("enable").getBoolean(true)) return;
+        // `enable` scope is confined to filtering functionality for now
+        if (config().root().node("enable").getBoolean(true)) {
+            listeners(
+                new FilterCacheListener(),
+                new HopperInventoryListener()
+            );
+        }
 
         listeners(
-            new FilterCacheListener(),
-            new FilterEditListener(),
-            new HopperInventoryListener()
+            new FilterEditListener()
         );
 
         Function.register(

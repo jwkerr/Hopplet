@@ -36,6 +36,12 @@ public abstract class Plugin extends JavaPlugin {
 
     @Override
     public final void onEnable() {
+        initialise();
+    }
+
+    public final void initialise() {
+        config.reload();
+
         enable();
 
         PluginManager pm = this.getServer().getPluginManager();
@@ -46,6 +52,10 @@ public abstract class Plugin extends JavaPlugin {
 
     @Override
     public final void onDisable() {
+        terminate();
+    }
+
+    public final void terminate() {
         disable();
 
         listeners.forEach(HandlerList::unregisterAll);
@@ -58,11 +68,8 @@ public abstract class Plugin extends JavaPlugin {
     public void disable() {}
 
     public void reload() {
-        disable();
-
-        config.reload();
-
-        enable();
+        terminate();
+        initialise();
     }
 
     public @NonNull Config config() {
