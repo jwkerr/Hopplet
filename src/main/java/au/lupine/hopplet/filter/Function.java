@@ -43,7 +43,7 @@ public interface Function<ArgumentType> {
     default boolean enabled() {
         List<String> disabled;
         try {
-            disabled = Hopplet.instance().config().root().node("filter", "function", "disabled").getList(String.class, List.of());
+            disabled = Hopplet.instance().config().root().node("filter", "function", "disable").getList(String.class, List.of());
         } catch (SerializationException e) {
             disabled = List.of();
         }
