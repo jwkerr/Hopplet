@@ -181,7 +181,7 @@ public final class FilterEditListener implements Listener {
                 .inputs(List.of(
                     DialogInput.text("filter_input", translate(player, "hopplet.dialog.edit_filter.input.filter_input"))
                         .initial(text)
-                        .maxLength(Hopplet.instance().config().root().node("dialog", "input_length").getInt())
+                        .maxLength(Hopplet.instance().config().root().node("filter", "edit", "dialog", "input_length").getInt())
                         .width(300)
                         .multiline(TextDialogInput.MultilineOptions.create(null, 100))
                         .build()

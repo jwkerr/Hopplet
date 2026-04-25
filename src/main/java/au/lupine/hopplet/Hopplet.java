@@ -53,18 +53,18 @@ public final class Hopplet extends Plugin {
 
     @Override
     public @NonNull Map<String, Object> nodes() {
-        Map<String, Object> nodes = new LinkedHashMap<>();
-
-        Map<String, Object> dialog = new LinkedHashMap<>();
-        dialog.put("input_length", 512);
-
-        Map<String, Object> functions = new LinkedHashMap<>();
-        functions.put("disabled", List.of());
-
-        nodes.put("dialog", dialog);
-        nodes.put("functions", functions);
-
-        return nodes;
+        return Map.of(
+            "filter", Map.of(
+                "edit", Map.of(
+                    "dialog", Map.of(
+                        "input_length", 512
+                    )
+                ),
+                "function", Map.of(
+                    "disabled", List.of()
+                )
+            )
+        );
     }
 
     public static @NonNull Hopplet instance() {
