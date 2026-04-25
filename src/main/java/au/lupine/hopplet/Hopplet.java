@@ -61,7 +61,7 @@ public final class Hopplet extends Plugin {
         return Map.of(
             "enable", true,
             "filter", Map.of(
-                "disable_hopper_on_compilation_error", false,
+                "disable_hopper_on_compilation_error", true,
                 "edit", Map.of(
                     "dialog", Map.of(
                         "max_input_length", 512
