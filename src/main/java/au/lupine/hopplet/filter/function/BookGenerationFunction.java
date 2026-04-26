@@ -39,14 +39,7 @@ public final class BookGenerationFunction implements Function<Set<BookMeta.Gener
 
     @Override
     public @NonNull Set<BookMeta.Generation> compile(@NonNull List<String> arguments) throws FilterCompileException {
-        if (arguments.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.no_arguments_provided",
-                    Argument.string("name", name())
-                )
-            );
-        }
+        argsRequired(arguments);
 
         Set<BookMeta.Generation> generations = new HashSet<>();
         for (String argument : arguments) {

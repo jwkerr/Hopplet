@@ -49,14 +49,7 @@ public final class PotionEffectFunction implements Function<Set<PotionEffectFunc
 
     @Override
     public @NonNull Set<Spec> compile(@NonNull List<String> arguments) throws FilterCompileException {
-        if (arguments.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.no_arguments_provided",
-                    Argument.string("name", name())
-                )
-            );
-        }
+        argsRequired(arguments);
 
         Set<Spec> potions = new HashSet<>();
         nextArgument: for (String argument : arguments) {

@@ -3,6 +3,7 @@ package au.lupine.hopplet.filter;
 import au.lupine.hopplet.Hopplet;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
@@ -109,6 +110,28 @@ public interface Function<ArgumentType> {
         }
 
         return null;
+    }
+
+    default void argsRequired(@NonNull List<String> arguments) {
+        if (arguments.isEmpty()) {
+            throw new FilterCompileException(
+                Component.translatable(
+                    "hopplet.filter.function.default.compilation.exception.no_arguments_provided",
+                    Argument.string("name", name())
+                )
+            );
+        }
+    }
+
+    default void argsNotRequired(@NonNull List<String> arguments) {
+        if (!arguments.isEmpty()) {
+            throw new FilterCompileException(
+                Component.translatable(
+                    "hopplet.filter.function.default.compilation.exception.arguments_not_required",
+                    Argument.string("name", name())
+                )
+            );
+        }
     }
 
     final class NoArguments {

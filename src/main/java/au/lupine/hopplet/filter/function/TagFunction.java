@@ -41,14 +41,7 @@ public final class TagFunction implements Function<Set<Material>> {
 
     @Override
     public @NonNull Set<Material> compile(@NonNull List<String> arguments) throws FilterCompileException {
-        if (arguments.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.no_arguments_provided",
-                    Argument.string("name", name())
-                )
-            );
-        }
+        argsRequired(arguments);
 
         Set<Material> materials = EnumSet.noneOf(Material.class);
         for (String argument : arguments) {

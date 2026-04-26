@@ -49,11 +49,29 @@ public final class Hopplet extends Plugin {
         );
 
         Function.register(
-            new BookAuthorFunction(), new BookGenerationFunction(), new DisplayNameContainsFunction(), new DisplayNameEndsWithFunction(),
-            new DisplayNameFunction(), new DisplayNameStartsWithFunction(), new EnchantmentFunction(), new IsEdibleFunction(),
-            new IsEnchantedFunction(), new IsFuelFunction(), new IsRepairableFunction(), new IsStackableFunction(),
-            new ItemDurabilityFunction(), new MaterialContainsFunction(), new MaterialEndsWithFunction(), new MaterialFunction(),
-            new MaterialStartsWithFunction(), new PotionDurationFunction(), new PotionEffectFunction(), new TagFunction(),
+            new BookAuthorFunction(),
+            new BookGenerationFunction(),
+            new DisplayNameContainsFunction(),
+            new DisplayNameEndsWithFunction(),
+            new DisplayNameFunction(),
+            new DisplayNameStartsWithFunction(),
+            new EnchantmentFunction(),
+            new IsEdibleFunction(),
+            new IsEnchantedFunction(),
+            new IsFuelFunction(),
+            new IsRepairableFunction(),
+            new IsStackableFunction(),
+            new IsUnbreakableFunction(),
+            new ItemDurabilityFunction(),
+            new ItemRarityFunction(),
+            new MaterialContainsFunction(),
+            new MaterialEndsWithFunction(),
+            new MaterialFunction(),
+            new MaterialStartsWithFunction(),
+            new PotionDurationFunction(),
+            new PotionEffectFunction(),
+            new SourceTypeFunction(),
+            new TagFunction(),
             new ThrowerFunction()
         );
     }

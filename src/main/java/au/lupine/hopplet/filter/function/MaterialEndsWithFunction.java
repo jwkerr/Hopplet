@@ -37,14 +37,7 @@ public final class MaterialEndsWithFunction implements Function<Set<String>> {
 
     @Override
     public @NonNull Set<String> compile(@NonNull List<String> arguments) throws FilterCompileException {
-        if (arguments.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.no_arguments_provided",
-                    Argument.string("name", name())
-                )
-            );
-        }
+        argsRequired(arguments);
 
         return new HashSet<>(arguments);
     }

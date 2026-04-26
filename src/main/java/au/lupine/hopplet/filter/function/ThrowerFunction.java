@@ -42,14 +42,7 @@ public final class ThrowerFunction implements Function<Set<Either<UUID, String>>
 
     @Override
     public @NonNull Set<Either<UUID, String>> compile(@NonNull List<String> arguments) throws FilterCompileException {
-        if (arguments.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.no_arguments_provided",
-                    Argument.string("name", name())
-                )
-            );
-        }
+        argsRequired(arguments);
 
         final Set<Either<UUID, String>> eithers = new HashSet<>();
 

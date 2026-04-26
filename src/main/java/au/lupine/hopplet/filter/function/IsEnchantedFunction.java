@@ -38,14 +38,7 @@ public final class IsEnchantedFunction implements Function<Function.NoArguments>
 
     @Override
     public @NonNull NoArguments compile(@NonNull List<String> arguments) throws FilterCompileException {
-        if (!arguments.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.arguments_not_required",
-                    Argument.string("name", name())
-                )
-            );
-        }
+        argsNotRequired(arguments);
 
         return NO_ARGUMENTS;
     }

@@ -50,14 +50,7 @@ public final class EnchantmentFunction implements Function<Set<EnchantmentFuncti
 
     @Override
     public @NonNull Set<Spec> compile(@NonNull List<String> arguments) throws FilterCompileException {
-        if (arguments.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.no_arguments_provided",
-                    Argument.string("name", name())
-                )
-            );
-        }
+        argsRequired(arguments);
 
         Set<Spec> enchantments = new HashSet<>();
         nextArgument: for (String argument : arguments) {

@@ -6,9 +6,8 @@ import au.lupine.hopplet.filter.Function;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 
@@ -16,21 +15,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class MaterialFunction implements Function<Set<Material>> {
+public final class SourceTypeFunction implements Function<Set<InventoryType>> {
 
     @Override
     public @NonNull String name() {
-        return "material";
+        return "source_type";
     }
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("type");
+        return Set.of("source");
     }
 
     @Override
     public @NonNull Component description() {
-        return Component.translatable("hopplet.filter.function.material.description");
+        return Component.translatable("hopplet.filter.function.source_type.description");
     }
 
     @Override
@@ -39,33 +38,31 @@ public final class MaterialFunction implements Function<Set<Material>> {
     }
 
     @Override
-    public @NonNull Set<Material> compile(@NonNull List<String> arguments) throws FilterCompileException {
+    public @NonNull Set<InventoryType> compile(@NonNull List<String> arguments) throws FilterCompileException {
         argsRequired(arguments);
 
-        Set<Material> materials = new HashSet<>();
+        Set<InventoryType> types = new HashSet<>();
         for (String argument : arguments) {
-            NamespacedKey key = NamespacedKey.fromString(argument.toLowerCase());
-            Material material = key == null ? null : Registry.MATERIAL.get(key);
-
-            if (material == null) {
+            try {
+                types.add(InventoryType.valueOf(argument));
+            } catch (IllegalArgumentException e) {
                 throw new FilterCompileException(
                     Component.translatable(
-                        "hopplet.filter.function.material.compilation.exception.unknown_material",
+                        "hopplet.filter.function.source_type.compilation.exception.unknown_inventory_type",
                         Argument.string("input", argument)
                     )
                 );
             }
-
-            materials.add(material);
         }
 
-        return materials;
+        return types;
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<Material> materials) {
-        Material type = context.stack().getType();
+    public boolean test(Filter.@NonNull Context context, @NonNull Set<InventoryType> types) {
+        Inventory source = context.source();
+        if (source == null) return false;
 
-        return materials.contains(type);
+        return types.contains(source.getType());
     }
 }

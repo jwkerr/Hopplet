@@ -5,29 +5,27 @@ import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.translation.Argument;
-import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Set;
 
-public final class IsRepairableFunction implements Function<Function.NoArguments> {
+public final class IsUnbreakableFunction implements Function<Function.NoArguments> {
 
     @Override
     public @NonNull String name() {
-        return "is_repairable";
+        return "is_unbreakable";
     }
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("repairable");
+        return Set.of("unbreakable");
     }
 
     @Override
     public @NonNull Component description() {
-        return Component.translatable("hopplet.filter.function.is_repairable.description");
+        return Component.translatable("hopplet.filter.function.is_unbreakable.description");
     }
 
     @Override
@@ -44,6 +42,6 @@ public final class IsRepairableFunction implements Function<Function.NoArguments
 
     @Override
     public boolean test(Filter.@NonNull Context context, Function.@NonNull NoArguments arguments) {
-        return context.stack().getItemMeta() instanceof Repairable;
+        return context.stack().getItemMeta().isUnbreakable();
     }
 }
