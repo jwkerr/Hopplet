@@ -44,7 +44,7 @@ public final class ItemRarityFunction implements Function<Set<ItemRarity>> {
         Set<ItemRarity> rarities = new HashSet<>();
         for (String argument : arguments) {
             try {
-                rarities.add(ItemRarity.valueOf(argument));
+                rarities.add(ItemRarity.valueOf(argument.toUpperCase()));
             } catch (IllegalArgumentException e) {
                 throw new FilterCompileException(
                     Component.translatable(

@@ -44,7 +44,7 @@ public final class SourceTypeFunction implements Function<Set<InventoryType>> {
         Set<InventoryType> types = new HashSet<>();
         for (String argument : arguments) {
             try {
-                types.add(InventoryType.valueOf(argument));
+                types.add(InventoryType.valueOf(argument.toUpperCase()));
             } catch (IllegalArgumentException e) {
                 throw new FilterCompileException(
                     Component.translatable(
