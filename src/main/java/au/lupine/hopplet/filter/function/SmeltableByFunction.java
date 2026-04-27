@@ -65,7 +65,7 @@ public final class SmeltableByFunction implements Function<Set<InventoryType>> {
             } catch (IllegalArgumentException e) {
                 throw new FilterCompileException(
                     Component.translatable(
-                        "hopplet.filter.function.furnace_type.compilation.exception.unknown_furnace_type",
+                        "hopplet.filter.function.smeltable_by.compilation.exception.unknown_furnace_type",
                         Argument.string("input", argument)
                     )
                 );
