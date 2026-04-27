@@ -40,5 +40,5 @@ permissions:
 
 commands:
   hopplet:
-    description: "Command to interface with Hopplet."
+    description: Command to interface with Hopplet.
     permission: hopplet.command.hopplet
