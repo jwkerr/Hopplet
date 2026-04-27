@@ -48,6 +48,8 @@ public final class Hopplet extends Plugin {
             new FilterEditListener()
         );
 
+        FurnaceTypeFunction.warmCache();
+
         Function.register(
             new BookAuthorFunction(),
             new BookGenerationFunction(),
@@ -56,6 +58,7 @@ public final class Hopplet extends Plugin {
             new DisplayNameFunction(),
             new DisplayNameStartsWithFunction(),
             new EnchantmentFunction(),
+            new FurnaceTypeFunction(),
             new IsEdibleFunction(),
             new IsEnchantedFunction(),
             new IsFuelFunction(),
@@ -79,6 +82,7 @@ public final class Hopplet extends Plugin {
     @Override
     public void disable() {
         Filter.Cache.invalidate();
+        FurnaceTypeFunction.invalidateCache();
     }
 
     @Override

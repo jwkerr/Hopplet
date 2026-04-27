@@ -2,6 +2,7 @@ package au.lupine.hopplet.listener;
 
 import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
+import au.lupine.hopplet.filter.function.FurnaceTypeFunction;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
 import org.bukkit.Chunk;
@@ -18,6 +19,7 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.jspecify.annotations.NullMarked;
@@ -97,6 +99,11 @@ public final class FilterCacheListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void on(WorldUnloadEvent event) {
         Filter.Cache.BLOCK_CACHE.remove(event.getWorld().getUID());
+    }
+
+    @EventHandler
+    public void on(ServerLoadEvent event) {
+        FurnaceTypeFunction.warmCache();
     }
 
     @EventHandler
