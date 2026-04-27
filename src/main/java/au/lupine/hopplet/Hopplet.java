@@ -56,7 +56,6 @@ public final class Hopplet extends Plugin {
             new DisplayNameFunction(),
             new DisplayNameStartsWithFunction(),
             new EnchantmentFunction(),
-            new SmeltableByFunction(),
             new IsEdibleFunction(),
             new IsEnchantedFunction(),
             new IsFuelFunction(),
@@ -71,6 +70,7 @@ public final class Hopplet extends Plugin {
             new MaterialStartsWithFunction(),
             new PotionDurationFunction(),
             new PotionEffectFunction(),
+            new SmeltableByFunction(),
             new SourceTypeFunction(),
             new TagFunction(),
             new ThrowerFunction()
