@@ -29,10 +29,7 @@ public final class ArmorTrimPatternFunction implements Function<Set<TrimPattern>
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of(
-            "trim_pattern",
-            "pattern"
-        );
+        return Set.of("trim_pattern");
     }
 
     @Override

@@ -29,10 +29,7 @@ public final class ArmorTrimMaterialFunction implements Function<Set<TrimMateria
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of(
-            "trim_material",
-            "trim"
-        );
+        return Set.of("trim_material");
     }
 
     @Override
