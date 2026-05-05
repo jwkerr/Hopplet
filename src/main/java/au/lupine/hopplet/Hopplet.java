@@ -61,6 +61,7 @@ public final class Hopplet extends Plugin {
             new IsFuelFunction(),
             new IsRepairableFunction(),
             new IsStackableFunction(),
+            new IsTrimmedFunction(),
             new IsUnbreakableFunction(),
             new ItemDurabilityFunction(),
             new ItemRarityFunction(),
@@ -73,7 +74,9 @@ public final class Hopplet extends Plugin {
             new SmeltableByFunction(),
             new SourceTypeFunction(),
             new TagFunction(),
-            new ThrowerFunction()
+            new ThrowerFunction(),
+            new TrimMaterialFunction(),
+            new TrimPatternFunction()
         );
     }
 
