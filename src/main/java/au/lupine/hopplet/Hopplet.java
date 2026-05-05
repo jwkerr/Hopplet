@@ -49,6 +49,8 @@ public final class Hopplet extends Plugin {
         );
 
         Function.register(
+            new ArmorTrimMaterialFunction(),
+            new ArmorTrimPatternFunction(),
             new BookAuthorFunction(),
             new BookGenerationFunction(),
             new DisplayNameContainsFunction(),
@@ -56,12 +58,12 @@ public final class Hopplet extends Plugin {
             new DisplayNameFunction(),
             new DisplayNameStartsWithFunction(),
             new EnchantmentFunction(),
+            new HasArmorTrim(),
             new IsEdibleFunction(),
             new IsEnchantedFunction(),
             new IsFuelFunction(),
             new IsRepairableFunction(),
             new IsStackableFunction(),
-            new IsTrimmedFunction(),
             new IsUnbreakableFunction(),
             new ItemDurabilityFunction(),
             new ItemRarityFunction(),
@@ -74,9 +76,7 @@ public final class Hopplet extends Plugin {
             new SmeltableByFunction(),
             new SourceTypeFunction(),
             new TagFunction(),
-            new ThrowerFunction(),
-            new TrimMaterialFunction(),
-            new TrimPatternFunction()
+            new ThrowerFunction()
         );
     }
 

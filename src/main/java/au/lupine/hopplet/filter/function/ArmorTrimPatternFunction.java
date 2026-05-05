@@ -20,21 +20,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class TrimPatternFunction implements Function<Set<TrimPattern>> {
+public final class ArmorTrimPatternFunction implements Function<Set<TrimPattern>> {
 
     @Override
     public @NonNull String name() {
-        return "trim_pattern";
+        return "armor_trim_pattern";
     }
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("pattern");
+        return Set.of("trim_pattern", "pattern");
     }
 
     @Override
     public @NonNull Component description() {
-        return Component.translatable("hopplet.filter.function.trim_pattern.description");
+        return Component.translatable("hopplet.filter.function.armor_trim_pattern.description");
     }
 
     @Override
@@ -65,7 +65,7 @@ public final class TrimPatternFunction implements Function<Set<TrimPattern>> {
             if (pattern == null) {
                 throw new FilterCompileException(
                     Component.translatable(
-                        "hopplet.filter.function.trim_pattern.compilation.exception.unknown_trim_pattern",
+                        "hopplet.filter.function.armor_trim_pattern.compilation.exception.unknown_trim_pattern",
                         Argument.string("input", argument)
                     )
                 );

@@ -12,21 +12,21 @@ import org.jspecify.annotations.NonNull;
 import java.util.List;
 import java.util.Set;
 
-public final class IsTrimmedFunction implements Function<Function.NoArguments> {
+public final class HasArmorTrim implements Function<Function.NoArguments> {
 
     @Override
     public @NonNull String name() {
-        return "is_trimmed";
+        return "has_armor_trim";
     }
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("trimmed");
+        return Set.of("is_trimmed", "trimmed");
     }
 
     @Override
     public @NonNull Component description() {
-        return Component.translatable("hopplet.filter.function.is_trimmed.description");
+        return Component.translatable("hopplet.filter.function.has_armor_trim.description");
     }
 
     @Override
