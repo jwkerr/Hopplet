@@ -29,7 +29,10 @@ public final class ArmorTrimMaterialFunction implements Function<Set<TrimMateria
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("trim_material", "trim");
+        return Set.of(
+            "trim_material",
+            "trim"
+        );
     }
 
     @Override
@@ -80,8 +83,10 @@ public final class ArmorTrimMaterialFunction implements Function<Set<TrimMateria
     @Override
     public boolean test(Filter.@NonNull Context context, @NonNull Set<TrimMaterial> materials) {
         if (!(context.stack().getItemMeta() instanceof ArmorMeta meta)) return false;
+
         ArmorTrim trim = meta.getTrim();
         if (trim == null) return false;
+
         return materials.contains(trim.getMaterial());
     }
 }

@@ -21,7 +21,10 @@ public final class HasArmorTrimFunction implements Function<Function.NoArguments
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("is_trimmed", "trimmed");
+        return Set.of(
+            "is_trimmed",
+            "trimmed"
+        );
     }
 
     @Override

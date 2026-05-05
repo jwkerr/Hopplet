@@ -29,7 +29,10 @@ public final class ArmorTrimPatternFunction implements Function<Set<TrimPattern>
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("trim_pattern", "pattern");
+        return Set.of(
+            "trim_pattern",
+            "pattern"
+        );
     }
 
     @Override
@@ -80,8 +83,10 @@ public final class ArmorTrimPatternFunction implements Function<Set<TrimPattern>
     @Override
     public boolean test(Filter.@NonNull Context context, @NonNull Set<TrimPattern> patterns) {
         if (!(context.stack().getItemMeta() instanceof ArmorMeta meta)) return false;
+
         ArmorTrim trim = meta.getTrim();
         if (trim == null) return false;
+
         return patterns.contains(trim.getPattern());
     }
 }
