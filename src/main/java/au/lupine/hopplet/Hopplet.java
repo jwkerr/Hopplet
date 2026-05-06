@@ -74,7 +74,7 @@ public final class Hopplet extends Plugin {
             new PotionDurationFunction(),
             new PotionEffectFunction(),
             new SmeltableByFunction(),
-            new SourceTypeFunction(),
+            new SourceInventoryTypeFunction(),
             new TagFunction(),
             new ThrowerFunction()
         );

@@ -15,21 +15,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class SourceTypeFunction implements Function<Set<InventoryType>> {
+public final class SourceInventoryTypeFunction implements Function<Set<InventoryType>> {
 
     @Override
     public @NonNull String name() {
-        return "source_type";
+        return "source_inventory_type";
     }
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("source");
+        return Set.of(
+            "source_type",
+            "source"
+        );
     }
 
     @Override
     public @NonNull Component description() {
-        return Component.translatable("hopplet.filter.function.source_type.description");
+        return Component.translatable("hopplet.filter.function.source_inventory_type.description");
     }
 
     @Override
@@ -48,7 +51,7 @@ public final class SourceTypeFunction implements Function<Set<InventoryType>> {
             } catch (IllegalArgumentException e) {
                 throw new FilterCompileException(
                     Component.translatable(
-                        "hopplet.filter.function.source_type.compilation.exception.unknown_inventory_type",
+                        "hopplet.filter.function.source_inventory_type.compilation.exception.unknown_inventory_type",
                         Argument.string("input", argument)
                     )
                 );
