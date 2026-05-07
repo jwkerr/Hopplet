@@ -36,6 +36,7 @@ public final class PotionEffectFunction implements Function<Set<PotionEffectFunc
     public @NonNull Set<String> aliases() {
         return Set.of(
             "effect",
+            "pot_eff",
             "eff"
         );
     }

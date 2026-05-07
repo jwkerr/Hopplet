@@ -28,7 +28,10 @@ public final class PotionDurationFunction implements Function<Set<PotionDuration
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("duration");
+        return Set.of(
+            "duration",
+            "pot_dur"
+        );
     }
 
     @Override
