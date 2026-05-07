@@ -1,8 +1,8 @@
 package au.lupine.hopplet.filter.function;
 
 import au.lupine.hopplet.Hopplet;
-import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
+import au.lupine.hopplet.filter.context.FilterContext;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
@@ -43,7 +43,7 @@ public final class IsEnchantedFunction implements Function<Function.NoArguments>
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, Function.@NonNull NoArguments arguments) {
+    public boolean test(@NonNull FilterContext context, Function.@NonNull NoArguments arguments) {
         ItemStack item = context.stack();
 
         if (!item.getEnchantments().isEmpty()) return true;

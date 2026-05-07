@@ -4,6 +4,7 @@ import au.lupine.hopplet.base.Plugin;
 import au.lupine.hopplet.command.HoppletCommand;
 import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
+import au.lupine.hopplet.filter.cache.FilterCache;
 import au.lupine.hopplet.filter.function.*;
 import au.lupine.hopplet.listener.FilterCacheListener;
 import au.lupine.hopplet.listener.FilterEditListener;
@@ -82,7 +83,7 @@ public final class Hopplet extends Plugin {
 
     @Override
     public void disable() {
-        Filter.Cache.invalidate();
+        FilterCache.invalidate();
     }
 
     @Override

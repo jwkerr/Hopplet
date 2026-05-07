@@ -1,10 +1,9 @@
 package au.lupine.hopplet.filter.context;
 
-import au.lupine.hopplet.filter.Filter;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
-public final class ItemStackContext implements Filter.Context {
+public final class ItemStackContext implements FilterContext {
 
     private final @NonNull ItemStack stack;
 

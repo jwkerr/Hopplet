@@ -1,8 +1,8 @@
 package au.lupine.hopplet.filter.function;
 
 import au.lupine.hopplet.Hopplet;
-import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
+import au.lupine.hopplet.filter.context.FilterContext;
 import au.lupine.hopplet.filter.context.InventoryTransferContext;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
@@ -63,7 +63,7 @@ public final class SourceInventoryTypeFunction implements Function<Set<Inventory
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<InventoryType> types) {
+    public boolean test(@NonNull FilterContext context, @NonNull Set<InventoryType> types) {
         if (!(context instanceof InventoryTransferContext ctx)) return false;
 
         Inventory source = ctx.source();

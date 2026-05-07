@@ -2,6 +2,7 @@ package au.lupine.hopplet.filter.edit;
 
 import au.lupine.hopplet.Hopplet;
 import au.lupine.hopplet.filter.Filter;
+import au.lupine.hopplet.filter.cache.FilterCache;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -43,13 +44,13 @@ public final class HopperEditTarget implements EditTarget {
             Block target = location.getBlock();
             if (!(target.getState(false) instanceof Hopper hopper)) return;
 
-            Filter.Cache.invalidate(hopper);
+            FilterCache.invalidate(hopper);
 
             if (input.isBlank()) {
                 hopper.customName(null);
             } else {
                 hopper.customName(Component.text(input, Filter.style));
-                if (filter != null) Filter.Cache.cache(hopper, filter);
+                if (filter != null) FilterCache.cache(hopper, filter);
             }
 
             hopper.setTransferCooldown(20);

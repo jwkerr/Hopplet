@@ -1,8 +1,8 @@
 package au.lupine.hopplet.filter.function;
 
 import au.lupine.hopplet.Hopplet;
-import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
+import au.lupine.hopplet.filter.context.FilterContext;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
@@ -79,7 +79,7 @@ public final class SmeltableByFunction implements Function<Set<InventoryType>> {
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<InventoryType> furnaces) {
+    public boolean test(@NonNull FilterContext context, @NonNull Set<InventoryType> furnaces) {
         ItemStack stack = context.stack();
 
         for (FurnaceInventory inventory : FURNACE_INVENTORIES) {

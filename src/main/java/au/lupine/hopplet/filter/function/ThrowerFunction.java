@@ -1,8 +1,8 @@
 package au.lupine.hopplet.filter.function;
 
 import au.lupine.hopplet.Hopplet;
-import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
+import au.lupine.hopplet.filter.context.FilterContext;
 import au.lupine.hopplet.filter.context.ItemEntityContext;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import au.lupine.hopplet.util.Either;
@@ -71,7 +71,7 @@ public final class ThrowerFunction implements Function<Set<Either<UUID, String>>
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<Either<UUID, String>> arguments) {
+    public boolean test(@NonNull FilterContext context, @NonNull Set<Either<UUID, String>> arguments) {
         if (!(context instanceof ItemEntityContext ctx)) return false;
 
         UUID thrower = ctx.item().getThrower();
@@ -91,16 +91,12 @@ public final class ThrowerFunction implements Function<Set<Either<UUID, String>>
 
     // Taken from paper inside net/minecraft/util/StringUtil
     // does create a small problem for servers using floodgate, the default prefix '.' is already considered reasonable, but directly integrating with its api and retrieving the prefix from that is also possible if wanted.
-    private static boolean isReasonablePlayerName(final String name) {
-        if (name.isEmpty() || name.length() > 16) {
-            return false;
-        }
+    private static boolean isReasonablePlayerName(@NonNull String name) {
+        if (name.isEmpty() || name.length() > 16) return false;
 
         for (int i = 0, len = name.length(); i < len; ++i) {
-            final char c = name.charAt(i);
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_' || c == '.')) {
-                continue;
-            }
+            char c = name.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_' || c == '.')) continue;
 
             return false;
         }

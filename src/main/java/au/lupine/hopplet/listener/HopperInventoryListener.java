@@ -2,6 +2,8 @@ package au.lupine.hopplet.listener;
 
 import au.lupine.hopplet.Hopplet;
 import au.lupine.hopplet.filter.Filter;
+import au.lupine.hopplet.filter.cache.FilterCache;
+import au.lupine.hopplet.filter.context.FilterContext;
 import au.lupine.hopplet.filter.context.HopperInventoryTransferContext;
 import au.lupine.hopplet.filter.context.HopperPickupItemContext;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
@@ -31,8 +33,8 @@ public final class HopperInventoryListener implements Listener {
         Filter filter;
         try {
             filter = switch (holder) {
-                case Hopper hopper -> Filter.Cache.getOrCompile(hopper);
-                case HopperMinecart hopper -> Filter.Cache.getOrCompile(hopper);
+                case Hopper hopper -> FilterCache.getOrCompile(hopper);
+                case HopperMinecart hopper -> FilterCache.getOrCompile(hopper);
                 default -> null;
             };
         } catch (FilterCompileException e) {
@@ -44,7 +46,7 @@ public final class HopperInventoryListener implements Listener {
         Inventory source = event.getSource();
 
         if (filter != null) {
-            Filter.Context context = new HopperInventoryTransferContext(item, source, destination);
+            FilterContext context = new HopperInventoryTransferContext(item, source, destination);
 
             if (!filter.test(context)) event.setCancelled(true);
             return;
@@ -59,7 +61,7 @@ public final class HopperInventoryListener implements Listener {
 
         Filter alternativeFilter;
         try {
-            alternativeFilter = Filter.Cache.getOrCompile(alternative);
+            alternativeFilter = FilterCache.getOrCompile(alternative);
         } catch (FilterCompileException e) {
             return;
         }
@@ -80,8 +82,8 @@ public final class HopperInventoryListener implements Listener {
         Filter filter;
         try {
             filter = switch (holder) {
-                case Hopper hopper -> Filter.Cache.getOrCompile(hopper);
-                case HopperMinecart hopper -> Filter.Cache.getOrCompile(hopper);
+                case Hopper hopper -> FilterCache.getOrCompile(hopper);
+                case HopperMinecart hopper -> FilterCache.getOrCompile(hopper);
                 default -> null;
             };
         } catch (FilterCompileException e) {
@@ -91,7 +93,7 @@ public final class HopperInventoryListener implements Listener {
 
         if (filter == null) return;
 
-        Filter.Context context = new HopperPickupItemContext(event.getItem(), inventory);
+        FilterContext context = new HopperPickupItemContext(event.getItem(), inventory);
 
         if (!filter.test(context)) event.setCancelled(true);
     }

@@ -1,8 +1,8 @@
 package au.lupine.hopplet.filter.function;
 
 import au.lupine.hopplet.Hopplet;
-import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
+import au.lupine.hopplet.filter.context.FilterContext;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import au.lupine.hopplet.util.Comparator;
 import io.papermc.paper.registry.RegistryAccess;
@@ -87,7 +87,7 @@ public final class PotionEffectFunction implements Function<Set<PotionEffectFunc
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<Spec> arguments) {
+    public boolean test(@NonNull FilterContext context, @NonNull Set<Spec> arguments) {
         ItemStack item = context.stack();
 
         if (!(item.getItemMeta() instanceof PotionMeta meta)) return false;

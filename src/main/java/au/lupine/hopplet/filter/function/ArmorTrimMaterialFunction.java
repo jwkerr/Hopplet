@@ -1,8 +1,8 @@
 package au.lupine.hopplet.filter.function;
 
 import au.lupine.hopplet.Hopplet;
-import au.lupine.hopplet.filter.Filter;
 import au.lupine.hopplet.filter.Function;
+import au.lupine.hopplet.filter.context.FilterContext;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
@@ -78,7 +78,7 @@ public final class ArmorTrimMaterialFunction implements Function<Set<TrimMateria
     }
 
     @Override
-    public boolean test(Filter.@NonNull Context context, @NonNull Set<TrimMaterial> materials) {
+    public boolean test(@NonNull FilterContext context, @NonNull Set<TrimMaterial> materials) {
         if (!(context.stack().getItemMeta() instanceof ArmorMeta meta)) return false;
 
         ArmorTrim trim = meta.getTrim();
