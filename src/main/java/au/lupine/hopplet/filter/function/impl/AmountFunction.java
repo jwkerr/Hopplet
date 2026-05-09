@@ -35,6 +35,11 @@ public final class AmountFunction implements Matcher<Comparator> {
     }
 
     @Override
+    public @NonNull MatchStrategy<Comparator> strategy() {
+        return MatchStrategy.all();
+    }
+
+    @Override
     public @NonNull Comparator parse(@NonNull String argument) throws FilterCompileException {
         Comparator comparator = Comparator.of(argument);
 
