@@ -50,6 +50,7 @@ public final class Hopplet extends Plugin {
         );
 
         Function.register(
+            new AmountFunction(),
             new ArmorTrimMaterialFunction(),
             new ArmorTrimPatternFunction(),
             new BookAuthorFunction(),
