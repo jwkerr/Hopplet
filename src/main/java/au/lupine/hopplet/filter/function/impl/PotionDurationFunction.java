@@ -56,6 +56,8 @@ public final class PotionDurationFunction implements Matcher<Comparator> {
 
         Comparator comparator = Comparator.of(normalised);
 
+        comparator.wholeValueOrThrow(argument);
+
         if (comparator.value() < 0) {
             throw new FilterCompileException(
                 Component.translatable(

@@ -46,10 +46,10 @@ public final class Comparator {
         for (Type type : Type.values()) {
             String symbol = type.symbol;
 
-            if (text.startsWith(symbol)) return new Comparator(type, parse(text.substring(symbol.length())));
+            if (text.startsWith(symbol)) return new Comparator(type, parse(text.substring(symbol.length()), text));
         }
 
-        return new Comparator(Type.EQUAL_TO, parse(text));
+        return new Comparator(Type.EQUAL_TO, parse(text, text));
     }
 
     /// Converts the specified text into a `Pair<String, Comparator>` by "splitting" it at the comparator.
@@ -73,21 +73,21 @@ public final class Comparator {
             String string = normalised.substring(0, index);
             return Pair.of(
                 string,
-                Comparator.of(type, parse(normalised.substring(index + symbol.length())))
+                Comparator.of(type, parse(normalised.substring(index + symbol.length()), text))
             );
         }
 
         return Pair.of(text, def);
     }
 
-    private static double parse(@NonNull String text) throws FilterCompileException {
+    private static double parse(@NonNull String text, @NonNull String input) throws FilterCompileException {
         try {
             return Double.parseDouble(text);
         } catch (NumberFormatException e) {
             throw new FilterCompileException(
                 Component.translatable(
-                    "hopplet.filter.function.default.compilation.exception.invalid_comparator",
-                    Argument.string("comparator", text)
+                    "hopplet.filter.function.default.compilation.exception.comparator.invalid_value",
+                    Argument.string("input", input)
                 )
             );
         }
@@ -102,6 +102,15 @@ public final class Comparator {
             case LESS_THAN -> value < this.value;
             case GREATER_THAN -> value > this.value;
         };
+    }
+
+    public void wholeValueOrThrow(@NonNull String input) throws FilterCompileException {
+        if (value != Math.floor(value)) throw new FilterCompileException(
+            Component.translatable(
+                "hopplet.filter.function.default.compilation.exception.comparator.value_not_whole",
+                Argument.string("input", input)
+            )
+        );
     }
 
     public enum Type {

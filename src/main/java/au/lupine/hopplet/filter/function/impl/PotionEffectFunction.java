@@ -64,6 +64,8 @@ public final class PotionEffectFunction implements Matcher<Pair<PotionEffectType
         PotionEffectType effect = effect(pair.left(), argument);
         Comparator comparator = pair.right();
 
+        comparator.wholeValueOrThrow(argument);
+
         if (comparator.value() < 1) {
             throw new FilterCompileException(
                 Component.translatable(

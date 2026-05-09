@@ -60,6 +60,8 @@ public final class EnchantmentFunction implements Matcher<Pair<Enchantment, Comp
         Enchantment enchantment = enchantment(pair.left(), argument);
         Comparator comparator = pair.right();
 
+        comparator.wholeValueOrThrow(argument);
+
         if (comparator.value() < 1) {
             throw new FilterCompileException(
                 Component.translatable(
