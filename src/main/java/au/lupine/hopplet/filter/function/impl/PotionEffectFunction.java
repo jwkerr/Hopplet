@@ -7,7 +7,9 @@ import au.lupine.hopplet.filter.function.Matcher;
 import au.lupine.hopplet.util.Comparator;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
@@ -17,13 +19,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public final class PotionEffectFunction implements Matcher<PotionEffectFunction.Argument> {
+public final class PotionEffectFunction implements Matcher<Pair<PotionEffectType, Comparator>> {
 
     private static final Registry<PotionEffectType> POTION_EFFECT_TYPE_REGISTRY = RegistryAccess.registryAccess().getRegistry(RegistryKey.MOB_EFFECT);
 
@@ -52,42 +53,31 @@ public final class PotionEffectFunction implements Matcher<PotionEffectFunction.
     }
 
     @Override
-    public @NonNull MatchStrategy<Argument> strategy() {
+    public @NonNull MatchStrategy<Pair<PotionEffectType, Comparator>> strategy() {
         return MatchStrategy.all();
     }
 
     @Override
-    public @NonNull Argument parse(@NonNull String argument) throws FilterCompileException {
-        String normalised = argument.toLowerCase().replaceAll("\\s", "");
+    public @NonNull Pair<PotionEffectType, Comparator> parse(@NonNull String argument) throws FilterCompileException {
+        Pair<String, Comparator> pair = Comparator.split(argument, Comparator.of(Comparator.Type.GREATER_THAN_OR_EQUAL_TO, 1));
 
-        for (Comparator comparator : Comparator.values()) {
-            String symbol = comparator.symbol();
-            int index = normalised.indexOf(symbol);
-            if (index < 0) continue;
+        PotionEffectType effect = effect(pair.left(), argument);
+        Comparator comparator = pair.right();
 
-            PotionEffectType effect = effect(normalised.substring(0, index), argument);
-            int level = amplifier(normalised.substring(index + symbol.length()), argument);
-
-            if (level < 1) {
-                throw new FilterCompileException(
-                    Component.translatable(
-                        "hopplet.filter.function.potion_effect.compilation.exception.amplifier_must_be_positive",
-                        net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                    )
-                );
-            }
-
-            return new Argument(effect, comparator, level);
+        if (comparator.value() < 1) {
+            throw new FilterCompileException(
+                Component.translatable(
+                    "hopplet.filter.function.potion_effect.compilation.exception.amplifier_must_be_positive",
+                    Argument.string("input", argument)
+                )
+            );
         }
 
-        PotionEffectType effect = effect(normalised, argument);
-        return new Argument(effect, null, null);
+        return Pair.of(effect, comparator);
     }
 
-    public record Argument(@NonNull PotionEffectType effect, @Nullable Comparator comparator, @Nullable Integer amplifier) {}
-
     @Override
-    public boolean matches(@NonNull Context context, @NonNull Argument argument) {
+    public boolean matches(@NonNull Context context, @NonNull Pair<PotionEffectType, Comparator> pair) {
         ItemStack stack = context.stack();
 
         if (!(stack.getItemMeta() instanceof PotionMeta meta)) return false;
@@ -100,23 +90,26 @@ public final class PotionEffectFunction implements Matcher<PotionEffectFunction.
         effects.addAll(meta.getCustomEffects());
         if (effects.isEmpty()) return false;
 
+        PotionEffectType specified = pair.left();
+        Comparator comparator = pair.right();
+
+        System.out.println(specified.getKey().getKey() + comparator);
+
         for (PotionEffect effect : effects) {
-            if (effect.getType() != argument.effect) continue;
+            if (effect.getType() != specified) continue;
 
-            if (argument.comparator == null || argument.amplifier == null) return true;
-
-            if (argument.comparator.compare(effect.getAmplifier() + 1, argument.amplifier)) return true;
+            if (comparator.test(effect.getAmplifier() + 1)) return true;
         }
 
         return false;
     }
 
-    private static @NonNull PotionEffectType effect(@NonNull String name, @NonNull String argument) {
+    private static @NonNull PotionEffectType effect(@NonNull String name, @NonNull String argument) throws FilterCompileException {
         if (name.isEmpty()) {
             throw new FilterCompileException(
                 Component.translatable(
                     "hopplet.filter.function.potion_effect.compilation.exception.no_potion_effect_specified",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
+                    Argument.string("input", argument)
                 )
             );
         }
@@ -127,33 +120,11 @@ public final class PotionEffectFunction implements Matcher<PotionEffectFunction.
             throw new FilterCompileException(
                 Component.translatable(
                     "hopplet.filter.function.potion_effect.compilation.exception.unknown_potion_effect",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
+                    Argument.string("input", argument)
                 )
             );
         }
 
         return effect;
-    }
-
-    private static int amplifier(@NonNull String text, @NonNull String argument) {
-        if (text.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.potion_effect.compilation.exception.no_amplifier_specified",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                )
-            );
-        }
-
-        try {
-            return Integer.parseInt(text);
-        } catch (NumberFormatException e) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.potion_effect.compilation.exception.invalid_amplifier",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                )
-            );
-        }
     }
 }

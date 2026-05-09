@@ -6,6 +6,7 @@ import au.lupine.hopplet.filter.exception.FilterCompileException;
 import au.lupine.hopplet.filter.function.Matcher;
 import au.lupine.hopplet.util.Comparator;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.Plugin;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public final class PotionDurationFunction implements Matcher<PotionDurationFunction.Argument> {
+public final class PotionDurationFunction implements Matcher<Comparator> {
 
     @Override
     public @NonNull String name() {
@@ -43,38 +44,32 @@ public final class PotionDurationFunction implements Matcher<PotionDurationFunct
     }
 
     @Override
-    public @NonNull MatchStrategy<Argument> strategy() {
+    public @NonNull MatchStrategy<Comparator> strategy() {
         return MatchStrategy.all();
     }
 
     @Override
-    public @NonNull Argument parse(@NonNull String argument) throws FilterCompileException {
+    public @NonNull Comparator parse(@NonNull String argument) throws FilterCompileException {
         String normalised = argument.toLowerCase().replaceAll("\\s", "");
 
-        if (normalised.equals("infinite") || normalised.equals("unlimited"))
-            return new Argument(Comparator.EQUAL_TO, PotionEffect.INFINITE_DURATION);
+        if (normalised.equals("infinite") || normalised.equals("unlimited")) return Comparator.of(PotionEffect.INFINITE_DURATION);
 
-        Comparator comparator = Comparator.EQUAL_TO;
-        String value = normalised;
+        Comparator comparator = Comparator.of(normalised);
 
-        for (Comparator c : Comparator.values()) {
-            String symbol = c.symbol();
-
-            if (normalised.startsWith(symbol)) {
-                comparator = c;
-                value = normalised.substring(symbol.length());
-                break;
-            }
+        if (comparator.value() < 0) {
+            throw new FilterCompileException(
+                Component.translatable(
+                    "hopplet.filter.function.potion_duration.compilation.exception.negative_duration",
+                    Argument.string("input", argument)
+                )
+            );
         }
 
-        int ticks = ticks(value, argument);
-        return new Argument(comparator, ticks);
+        return comparator;
     }
 
-    public record Argument(@NonNull Comparator comparator, int ticks) {}
-
     @Override
-    public boolean matches(@NonNull Context context, @NonNull Argument argument) {
+    public boolean matches(@NonNull Context context, @NonNull Comparator comparator) {
         ItemStack stack = context.stack();
 
         if (!(stack.getItemMeta() instanceof PotionMeta meta)) return false;
@@ -87,55 +82,36 @@ public final class PotionDurationFunction implements Matcher<PotionDurationFunct
         effects.addAll(meta.getCustomEffects());
         if (effects.isEmpty()) return false;
 
-        for (PotionEffect effect : effects) {
-            int duration = effect.getDuration();
+        boolean infiniteComparator = comparator.value() == PotionEffect.INFINITE_DURATION;
 
-            if (duration == PotionEffect.INFINITE_DURATION) {
-                if (argument.ticks == PotionEffect.INFINITE_DURATION) return true;
-                if (argument.comparator == Comparator.GREATER_THAN || argument.comparator == Comparator.GREATER_THAN_OR_EQUAL_TO) return true;
+        for (PotionEffect effect : effects) {
+            boolean infiniteEffect = effect.isInfinite();
+
+            if (infiniteEffect && infiniteComparator) return true;
+
+            Comparator.Type type = comparator.type();
+
+            if (infiniteEffect) {
+                if (type == Comparator.Type.GREATER_THAN_OR_EQUAL_TO ||
+                    type == Comparator.Type.GREATER_THAN ||
+                    type == Comparator.Type.NOT_EQUAL
+                ) return true;
 
                 continue;
             }
 
-            if (argument.ticks == PotionEffect.INFINITE_DURATION) continue;
+            if (infiniteComparator) {
+                if (type == Comparator.Type.LESS_THAN_OR_EQUAL_TO ||
+                    type == Comparator.Type.LESS_THAN ||
+                    type == Comparator.Type.NOT_EQUAL
+                ) return true;
 
-            if (argument.comparator.compare(duration, argument.ticks)) return true;
+                continue;
+            }
+
+            if (comparator.test(effect.getDuration())) return true;
         }
 
         return false;
-    }
-
-    private static int ticks(@NonNull String text, @NonNull String argument) {
-        if (text.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.potion_duration.compilation.exception.no_duration_specified",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                )
-            );
-        }
-
-        int ticks;
-        try {
-            ticks = Integer.parseInt(text);
-        } catch (NumberFormatException e) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.potion_duration.compilation.exception.invalid_duration",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                )
-            );
-        }
-
-        if (ticks < -1) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.potion_duration.compilation.exception.less_than_negative_one",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                )
-            );
-        }
-
-        return ticks;
     }
 }

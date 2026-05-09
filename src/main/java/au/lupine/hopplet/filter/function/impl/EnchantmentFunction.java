@@ -7,7 +7,9 @@ import au.lupine.hopplet.filter.function.Matcher;
 import au.lupine.hopplet.util.Comparator;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
@@ -15,12 +17,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
 
-public final class EnchantmentFunction implements Matcher<EnchantmentFunction.Argument> {
+public final class EnchantmentFunction implements Matcher<Pair<Enchantment, Comparator>> {
 
     private static final Registry<Enchantment> ENCHANTMENT_REGISTRY = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT);
 
@@ -48,42 +49,31 @@ public final class EnchantmentFunction implements Matcher<EnchantmentFunction.Ar
     }
 
     @Override
-    public @NonNull MatchStrategy<Argument> strategy() {
+    public @NonNull MatchStrategy<Pair<Enchantment, Comparator>> strategy() {
         return MatchStrategy.all();
     }
 
     @Override
-    public @NonNull Argument parse(@NonNull String argument) throws FilterCompileException {
-        String normalised = argument.toLowerCase().replaceAll("\\s", "");
+    public @NonNull Pair<Enchantment, Comparator> parse(@NonNull String argument) throws FilterCompileException {
+        Pair<String, Comparator> pair = Comparator.split(argument, Comparator.of(Comparator.Type.GREATER_THAN_OR_EQUAL_TO, 1));
 
-        for (Comparator comparator : Comparator.values()) {
-            String symbol = comparator.symbol();
-            int index = normalised.indexOf(symbol);
-            if (index < 0) continue;
+        Enchantment enchantment = enchantment(pair.left(), argument);
+        Comparator comparator = pair.right();
 
-            Enchantment enchantment = enchantment(normalised.substring(0, index), argument);
-            int level = level(normalised.substring(index + symbol.length()), argument);
-
-            if (level < 1) {
-                throw new FilterCompileException(
-                    Component.translatable(
-                        "hopplet.filter.function.enchantment.compilation.exception.level_must_be_positive",
-                        net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                    )
-                );
-            }
-
-            return new Argument(enchantment, comparator, level);
+        if (comparator.value() < 1) {
+            throw new FilterCompileException(
+                Component.translatable(
+                    "hopplet.filter.function.enchantment.compilation.exception.level_must_be_positive",
+                    Argument.string("input", argument)
+                )
+            );
         }
 
-        Enchantment enchantment = enchantment(normalised, argument);
-        return new Argument(enchantment, null, null);
+        return Pair.of(enchantment, comparator);
     }
 
-    public record Argument(@NonNull Enchantment enchantment, @Nullable Comparator comparator, @Nullable Integer level) {}
-
     @Override
-    public boolean matches(@NonNull Context context, @NonNull Argument argument) {
+    public boolean matches(@NonNull Context context, @NonNull Pair<Enchantment, Comparator> pair) {
         ItemStack stack = context.stack();
 
         Map<Enchantment, Integer> enchantments = stack.getItemMeta() instanceof EnchantmentStorageMeta meta
@@ -92,20 +82,18 @@ public final class EnchantmentFunction implements Matcher<EnchantmentFunction.Ar
 
         if (enchantments.isEmpty()) return false;
 
-        Integer level = enchantments.get(argument.enchantment);
+        Integer level = enchantments.get(pair.left()); // TODO: unbreaking>=1 doesn't work, unbreaking=3 does
         if (level == null) return false;
 
-        if (argument.comparator == null || argument.level == null) return true;
-
-        return argument.comparator.compare(level, argument.level);
+        return pair.right().test(level);
     }
 
-    private static @NonNull Enchantment enchantment(@NonNull String name, @NonNull String argument) {
+    private static @NonNull Enchantment enchantment(@NonNull String name, @NonNull String argument) throws FilterCompileException {
         if (name.isEmpty()) {
             throw new FilterCompileException(
                 Component.translatable(
                     "hopplet.filter.function.enchantment.compilation.exception.no_enchantment_specified",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
+                    Argument.string("input", argument)
                 )
             );
         }
@@ -116,33 +104,11 @@ public final class EnchantmentFunction implements Matcher<EnchantmentFunction.Ar
             throw new FilterCompileException(
                 Component.translatable(
                     "hopplet.filter.function.enchantment.compilation.exception.unknown_enchantment",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
+                    Argument.string("input", argument)
                 )
             );
         }
 
         return enchantment;
-    }
-
-    private static int level(@NonNull String text, @NonNull String argument) {
-        if (text.isEmpty()) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.enchantment.compilation.exception.no_level_specified",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                )
-            );
-        }
-
-        try {
-            return Integer.parseInt(text);
-        } catch (NumberFormatException e) {
-            throw new FilterCompileException(
-                Component.translatable(
-                    "hopplet.filter.function.enchantment.compilation.exception.invalid_level",
-                    net.kyori.adventure.text.minimessage.translation.Argument.string("input", argument)
-                )
-            );
-        }
     }
 }
