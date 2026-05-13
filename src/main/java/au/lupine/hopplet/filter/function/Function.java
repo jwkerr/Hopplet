@@ -42,7 +42,17 @@ public interface Function<ArgumentType> {
 
     boolean test(@NonNull Context context, @NonNull ArgumentType compiled);
 
+    /// Override this if you want to conditionally disable your function, for example, when a dependency isn't present.
+    /// @return Whether this function is disabled.
+    default boolean disabled() {
+        return false;
+    }
+
+    /// This should not be overridden, use {@link #disabled()} if you need to disable the function.
+    /// @return Whether this function is enabled, taking into consideration what the output of {@link #disabled()} is.
     default boolean enabled() {
+        if (disabled()) return false;
+
         List<String> disabled;
         try {
             disabled = Hopplet.instance().config().root().node("filter", "function", "disable").getList(String.class, List.of());

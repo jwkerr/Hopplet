@@ -17,6 +17,9 @@ folia-supported: true
 libraries:
   - org.spongepowered:configurate-gson:4.2.0
 
+softdepend:
+  - Bottlet
+
 permissions:
   hopplet.dialog.edit_filter.use:
     description: Grants permission to open the filter editing dialog.

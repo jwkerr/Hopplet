@@ -82,6 +82,7 @@ public final class Hopplet extends Plugin {
             new SkullTextureFunction(),
             new SmeltableByFunction(),
             new SourceInventoryTypeFunction(),
+            new StoredExperienceFunction(),
             new TagFunction(),
             new ThrowerFunction()
         );

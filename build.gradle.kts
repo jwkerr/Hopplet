@@ -6,12 +6,15 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://jitpack.io")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
     compileOnly("org.spongepowered:configurate-gson:4.2.0")
+
+    compileOnly("com.github.jwkerr:Bottlet:-SNAPSHOT")
 }
 
 java {
@@ -22,6 +25,10 @@ tasks {
     runServer {
         minecraftVersion("1.21.11")
         jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
+
+        downloadPlugins {
+            modrinth("bottlet", "alpha-0.1.2")
+        }
     }
 
     processResources {
