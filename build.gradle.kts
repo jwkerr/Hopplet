@@ -7,6 +7,7 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://jitpack.io")
+    maven("https://repo.glaremasters.me/repository/towny/")
 }
 
 dependencies {
@@ -14,7 +15,8 @@ dependencies {
 
     compileOnly("org.spongepowered:configurate-gson:4.2.0")
 
-    compileOnly("com.github.jwkerr:Bottlet:-SNAPSHOT")
+    compileOnly("com.github.jwkerr:Bottlet:fc8a8adfde")
+    compileOnly("com.palmergames.bukkit.towny:towny:0.103.0.0")
 }
 
 java {
@@ -28,6 +30,7 @@ tasks {
 
         downloadPlugins {
             modrinth("bottlet", "alpha-0.1.3")
+            modrinth("towny", "0.103.0.0")
         }
     }
 

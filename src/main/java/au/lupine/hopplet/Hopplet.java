@@ -84,7 +84,9 @@ public final class Hopplet extends Plugin {
             new SourceInventoryTypeFunction(),
             new StoredExperienceFunction(),
             new TagFunction(),
-            new ThrowerFunction()
+            new ThrowerFunction(),
+            new ThrowerNationFunction(),
+            new ThrowerTownFunction()
         );
     }
 

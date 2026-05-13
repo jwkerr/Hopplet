@@ -19,6 +19,7 @@ libraries:
 
 softdepend:
   - Bottlet
+  - Towny
 
 permissions:
   hopplet.dialog.edit_filter.use:
