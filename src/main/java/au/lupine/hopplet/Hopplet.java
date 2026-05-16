@@ -72,6 +72,7 @@ public final class Hopplet extends Plugin {
             new IsSmeltableFunction(),
             new IsStackableFunction(),
             new IsUnbreakableFunction(),
+            new MapIDFunction(),
             new MaterialContainsFunction(),
             new MaterialEndsWithFunction(),
             new MaterialFunction(),
