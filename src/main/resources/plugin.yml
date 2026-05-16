@@ -22,6 +22,10 @@ softdepend:
   - Towny
 
 permissions:
+  hopplet.edit.by_interacting:
+    description: Grants permission to edit filters by clicking the hopper.
+    default: true
+
   hopplet.edit.hopper:
     description: Grants permission to edit the filter of hoppers.
     default: true
