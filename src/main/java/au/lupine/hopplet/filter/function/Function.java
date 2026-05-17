@@ -5,8 +5,11 @@ import au.lupine.hopplet.filter.context.Context;
 import au.lupine.hopplet.filter.exception.FilterCompileException;
 import au.lupine.hopplet.util.Either;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -166,5 +169,18 @@ public interface Function<ArgumentType> {
         }
 
         return true;
+    }
+
+    static @Nullable String lore(@NonNull ItemStack stack) {
+        List<Component> components = stack.lore();
+        if (components == null) return null;
+
+        return PlainTextComponentSerializer.plainText()
+            .serialize(
+                Component.join(
+                    JoinConfiguration.spaces(),
+                    components
+                )
+            );
     }
 }
