@@ -18,9 +18,9 @@ public final class HopperRouting {
     public static @Nullable Hopper alternative(@NonNull Inventory sourceInventory, @NonNull Hopper destination) {
         if (!(sourceInventory.getHolder(false) instanceof Hopper source)) return null;
 
-        org.bukkit.block.data.type.Hopper sourceData = (org.bukkit.block.data.type.Hopper) source.getBlockData();
+        org.bukkit.block.data.type.Hopper data = (org.bukkit.block.data.type.Hopper) source.getBlockData();
 
-        BlockFace face = sourceData.getFacing();
+        BlockFace face = data.getFacing();
         if (face == BlockFace.DOWN) return null;
 
         Block facing = source.getBlock().getRelative(face);
@@ -35,6 +35,11 @@ public final class HopperRouting {
         }
 
         return facingHopper;
+    }
+
+    public static boolean enabled(@NonNull Hopper hopper) {
+        org.bukkit.block.data.type.Hopper data = (org.bukkit.block.data.type.Hopper) hopper.getBlockData();
+        return data.isEnabled();
     }
 
     public static boolean fits(@NonNull Inventory inventory, @NonNull ItemStack item) {

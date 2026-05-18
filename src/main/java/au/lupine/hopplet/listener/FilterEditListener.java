@@ -3,17 +3,16 @@ package au.lupine.hopplet.listener;
 import au.lupine.hopplet.filter.edit.EditDialog;
 import au.lupine.hopplet.filter.edit.HopperEditTarget;
 import au.lupine.hopplet.filter.edit.HopperMinecartEditTarget;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
 public final class FilterEditListener implements Listener {
@@ -26,11 +25,7 @@ public final class FilterEditListener implements Listener {
 
         if (!event.getAction().isRightClick()) return;
 
-        ItemStack item = event.getItem();
-        if (item != null) {
-            Material material = item.getType();
-            if (material.isBlock()) return;
-        }
+        if (event.getItem() != null && event.useItemInHand() != Event.Result.DENY) return;
 
         if (!player.isSneaking()) return;
 

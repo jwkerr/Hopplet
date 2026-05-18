@@ -58,6 +58,8 @@ public final class HopperInventoryListener implements Listener {
         Hopper alternative = HopperRouting.alternative(source, destinationHopper);
         if (alternative == null) return;
 
+        if (!HopperRouting.enabled(alternative)) return;
+
         if (!HopperRouting.fits(alternative.getInventory(), item)) return;
 
         Filter alternativeFilter;

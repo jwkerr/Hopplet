@@ -15,21 +15,24 @@ import org.jspecify.annotations.NonNull;
 import java.util.Set;
 import java.util.UUID;
 
-public final class ThrowerNationFunction implements Matcher<String> {
+public final class ThrowerTownyNationFunction implements Matcher<String> {
 
     @Override
     public @NonNull String name() {
-        return "thrower_nation";
+        return "thrower_towny_nation";
     }
 
     @Override
     public @NonNull Set<String> aliases() {
-        return Set.of("nation");
+        return Set.of(
+            "thrower_nation",
+            "nation"
+        );
     }
 
     @Override
     public @NonNull Component description() {
-        return Component.translatable("hopplet.filter.function.thrower_nation.description");
+        return Component.translatable("hopplet.filter.function.thrower_towny_nation.description");
     }
 
     @Override
