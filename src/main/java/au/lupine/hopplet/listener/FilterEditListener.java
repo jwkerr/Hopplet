@@ -1,8 +1,12 @@
 package au.lupine.hopplet.listener;
 
+import au.lupine.hopplet.filter.Filter;
+import au.lupine.hopplet.filter.compiler.Compiler;
 import au.lupine.hopplet.filter.edit.EditDialog;
 import au.lupine.hopplet.filter.edit.HopperEditTarget;
 import au.lupine.hopplet.filter.edit.HopperMinecartEditTarget;
+import au.lupine.hopplet.filter.exception.FilterCompileException;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Player;
@@ -23,10 +27,6 @@ public final class FilterEditListener implements Listener {
         if (!player.hasPermission("hopplet.edit.by_interacting")) return;
         if (!player.hasPermission("hopplet.edit.hopper")) return;
 
-        if (!event.getAction().isRightClick()) return;
-
-        if (event.getItem() != null && event.useItemInHand() != Event.Result.DENY) return;
-
         if (!player.isSneaking()) return;
 
         Block block = event.getClickedBlock();
@@ -34,11 +34,36 @@ public final class FilterEditListener implements Listener {
 
         if (!(block.getState(false) instanceof Hopper hopper)) return;
 
+        if (event.getAction().isLeftClick()) {
+            previewFilter(player, hopper);
+            event.setCancelled(true);
+            return;
+        }
+
+        if (!event.getAction().isRightClick()) return;
+
+        if (event.getItem() != null && event.useItemInHand() != Event.Result.DENY) return;
+
         BlockBreakEvent bbe = new BlockBreakEvent(block, player);
         if (!bbe.callEvent()) return; // Player does not have permission to edit this hopper.
 
         event.setCancelled(true);
         EditDialog.open(player, new HopperEditTarget(hopper));
+    }
+
+    private void previewFilter(@NonNull Player player, @NonNull Hopper hopper) {
+        try {
+            Filter filter = Compiler.compile(hopper);
+
+            if (filter == null) {
+                player.sendMessage(Component.translatable("hopplet.filter.preview.empty"));
+                return;
+            }
+
+            player.sendMessage(Component.text("Filter: ").append(Component.text(filter.raw(), Filter.style)));
+        } catch (FilterCompileException exception) {
+            player.sendMessage(exception);
+        }
     }
 
     @EventHandler
