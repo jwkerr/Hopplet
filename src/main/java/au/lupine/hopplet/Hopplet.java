@@ -78,6 +78,7 @@ public final class Hopplet extends Plugin {
             new IsRepairableFunction(),
             new IsSmeltableFunction(),
             new IsStackableFunction(),
+            new IsThrownFunction(),
             new IsUnbreakableFunction(),
             new LoreContainsFunction(),
             new LoreEndsWithFunction(),
