@@ -15,9 +15,14 @@ import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 public abstract class Plugin extends JavaPlugin {
 
@@ -91,7 +96,7 @@ public abstract class Plugin extends JavaPlugin {
     private void translations() {
         MiniMessageTranslationStore store = MiniMessageTranslationStore.create(Key.key(namespace(), "translations"));
 
-        for (Locale locale : Locale.getAvailableLocales()) {
+        for (Locale locale : readLocalesFromJar()) {
             try {
                 ResourceBundle bundle = ResourceBundle
                     .getBundle(
@@ -106,6 +111,30 @@ public abstract class Plugin extends JavaPlugin {
         }
 
         GlobalTranslator.translator().addSource(store);
+    }
+
+    private Collection<Locale> readLocalesFromJar() {
+        final Set<Locale> locales = new HashSet<>();
+        locales.add(Locale.of("en", "US"));
+
+        try {
+            URL root = Plugin.class.getResource("");
+            if (root == null) {
+                return locales;
+            }
+
+            try (final FileSystem fs = FileSystems.newFileSystem(root.toURI(), Collections.emptyMap()); Stream<Path> stream  = Files.list(fs.getRootDirectories().iterator().next().resolve("/lang"))) {
+                stream.map(path -> path.getFileName().toString())
+                        .filter(fileName -> fileName.startsWith("Bundle_") && fileName.endsWith(".properties"))
+                        .map(fileName -> fileName.substring("Bundle_".length(), fileName.lastIndexOf(".")).split("_")) // assumes all bundle files contain both a language + country
+                        .map(locale -> Locale.of(locale[0], locale[1]))
+                        .forEach(locales::add);
+            }
+        } catch (URISyntaxException | IOException e) {
+            getSLF4JLogger().warn("Failed to read resource bundle jars from the plugin jar", e);
+        }
+
+        return locales;
     }
 
     public static final class Config {
