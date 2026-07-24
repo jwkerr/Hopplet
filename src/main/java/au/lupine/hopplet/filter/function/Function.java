@@ -17,11 +17,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -93,50 +89,49 @@ public interface Function<ArgumentType> {
     /// Register your {@link Function functions} to be usable in filters.
     /// This method is idempotent, repeated calls will not register a function again.
     static void register(@NonNull Function<?>... functions) {
+        List<String> registered = new ArrayList<>();
+
         for (Function<?> function : functions) {
-            final NamespacedKey functionKey = function.key();
-            if (FUNCTIONS_BY_KEY.containsKey(functionKey)) {
-                continue;
-            }
+            NamespacedKey functionKey = function.key();
+            if (FUNCTIONS_BY_KEY.containsKey(functionKey)) continue;
 
             PreFunctionRegisterEvent event = new PreFunctionRegisterEvent(function);
             if (!event.callEvent()) continue;
 
-            Hopplet.instance().getLogger().info("Registering function: " + functionKey);
-
             FUNCTIONS.add(function);
 
             FUNCTIONS_BY_KEY.put(functionKey, function);
-            for (final NamespacedKey key : function.keys()) {
-                FUNCTIONS_BY_KEY.putIfAbsent(key, function);
-            }
+            for (NamespacedKey key : function.keys()) FUNCTIONS_BY_KEY.putIfAbsent(key, function);
 
             FUNCTIONS_BY_NAME.putIfAbsent(function.name(), function);
-            for (final String alias : function.aliases()) {
-                FUNCTIONS_BY_NAME.putIfAbsent(alias, function);
-            }
+            for (String alias : function.aliases()) FUNCTIONS_BY_NAME.putIfAbsent(alias, function);
 
             new FunctionRegisteredEvent(function).callEvent();
+
+            registered.add(function.key().asString());
         }
+
+        Hopplet.instance().getLogger().info("Registering functions: " + String.join(", ", registered));
     }
 
     static void unregister(@NonNull Function<?>... functions) {
-        for (Function<?> function : functions) {
-            final NamespacedKey functionKey = function.key();
+        List<String> unregistered = new ArrayList<>();
 
-            Hopplet.instance().getLogger().info("Unregistering function: " + functionKey);
+        for (Function<?> function : functions) {
+            NamespacedKey functionKey = function.key();
 
             FUNCTIONS.remove(function);
+
             FUNCTIONS_BY_KEY.remove(functionKey, function);
-            for (final NamespacedKey key : function.keys()) {
-                FUNCTIONS_BY_KEY.remove(key, function);
-            }
+            for (NamespacedKey key : function.keys()) FUNCTIONS_BY_KEY.remove(key, function);
 
             FUNCTIONS_BY_NAME.remove(function.name(), function);
-            for (final String alias : function.aliases()) {
-                FUNCTIONS_BY_NAME.remove(alias, function);
-            }
+            for (String alias : function.aliases()) FUNCTIONS_BY_NAME.remove(alias, function);
+
+            unregistered.add(function.key().asString());
         }
+
+        Hopplet.instance().getLogger().info("Unregistering functions: " + String.join(", ", unregistered));
     }
 
     static <FunctionType extends Function<?>> @Nullable FunctionType of(@NonNull Class<FunctionType> type) {
@@ -153,9 +148,7 @@ public interface Function<ArgumentType> {
     static @Nullable Function<?> of(@NonNull String identifier) {
         if (identifier.contains(":")) {
             NamespacedKey key = NamespacedKey.fromString(identifier);
-            if (key != null) {
-                return of(key);
-            }
+            if (key != null) return of(key);
         }
 
         return FUNCTIONS_BY_NAME.get(identifier);
