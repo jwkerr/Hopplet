@@ -17,19 +17,21 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public interface Function<ArgumentType> {
 
     @NonNull Set<Function<?>> FUNCTIONS = new CopyOnWriteArraySet<>();
 
+    @NonNull Map<NamespacedKey, Function<?>> FUNCTIONS_BY_KEY = new ConcurrentHashMap<>();
+    @NonNull Map<String, Function<?>> FUNCTIONS_BY_NAME = new ConcurrentHashMap<>();
+
     /// @return The name of this function in `snake_case`.
     @NonNull String name();
 
+    /// @return The aliases to use for this function, must contain the same elements throughout the lifetime of the program.
     default @NonNull Set<String> aliases() {
         return Set.of();
     }
@@ -87,27 +89,49 @@ public interface Function<ArgumentType> {
     /// Register your {@link Function functions} to be usable in filters.
     /// This method is idempotent, repeated calls will not register a function again.
     static void register(@NonNull Function<?>... functions) {
-        outer: for (Function<?> function : functions) {
-            for (Function<?> other : FUNCTIONS) {
-                if(other.key().equals(function.key())) continue outer;
-            }
+        List<String> registered = new ArrayList<>();
+
+        for (Function<?> function : functions) {
+            NamespacedKey functionKey = function.key();
+            if (FUNCTIONS_BY_KEY.containsKey(functionKey)) continue;
 
             PreFunctionRegisterEvent event = new PreFunctionRegisterEvent(function);
             if (!event.callEvent()) continue;
 
-            Hopplet.instance().getLogger().info("Registering function: " + function.key());
-
             FUNCTIONS.add(function);
 
+            FUNCTIONS_BY_KEY.put(functionKey, function);
+            for (NamespacedKey key : function.keys()) FUNCTIONS_BY_KEY.putIfAbsent(key, function);
+
+            FUNCTIONS_BY_NAME.putIfAbsent(function.name(), function);
+            for (String alias : function.aliases()) FUNCTIONS_BY_NAME.putIfAbsent(alias, function);
+
             new FunctionRegisteredEvent(function).callEvent();
+
+            registered.add(function.key().asString());
         }
+
+        Hopplet.instance().getLogger().info("Registering functions: " + String.join(", ", registered));
     }
 
     static void unregister(@NonNull Function<?>... functions) {
+        List<String> unregistered = new ArrayList<>();
+
         for (Function<?> function : functions) {
-            Hopplet.instance().getLogger().info("Unregistering function: " + function.key());
+            NamespacedKey functionKey = function.key();
+
             FUNCTIONS.remove(function);
+
+            FUNCTIONS_BY_KEY.remove(functionKey, function);
+            for (NamespacedKey key : function.keys()) FUNCTIONS_BY_KEY.remove(key, function);
+
+            FUNCTIONS_BY_NAME.remove(function.name(), function);
+            for (String alias : function.aliases()) FUNCTIONS_BY_NAME.remove(alias, function);
+
+            unregistered.add(function.key().asString());
         }
+
+        Hopplet.instance().getLogger().info("Unregistering functions: " + String.join(", ", unregistered));
     }
 
     static <FunctionType extends Function<?>> @Nullable FunctionType of(@NonNull Class<FunctionType> type) {
@@ -118,26 +142,16 @@ public interface Function<ArgumentType> {
     }
 
     static @Nullable Function<?> of(@NonNull NamespacedKey key) {
-        for (Function<?> function : FUNCTIONS) {
-            if (function.keys().contains(key)) return function;
-        }
-        return null;
+        return FUNCTIONS_BY_KEY.get(key);
     }
 
     static @Nullable Function<?> of(@NonNull String identifier) {
         if (identifier.contains(":")) {
             NamespacedKey key = NamespacedKey.fromString(identifier);
-            if (key == null) return null;
-
-            return of(key);
+            if (key != null) return of(key);
         }
 
-        for (Function<?> function : FUNCTIONS) {
-            if (function.name().equals(identifier)) return function;
-            if (function.aliases().contains(identifier)) return function;
-        }
-
-        return null;
+        return FUNCTIONS_BY_NAME.get(identifier);
     }
 
     // Function utilities that should probably have a better spot (inheritance?)
