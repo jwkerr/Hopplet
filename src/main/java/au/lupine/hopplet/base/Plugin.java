@@ -113,17 +113,15 @@ public abstract class Plugin extends JavaPlugin {
         GlobalTranslator.translator().addSource(store);
     }
 
-    private Collection<Locale> readLocalesFromJar() {
-        final Set<Locale> locales = new HashSet<>();
+    private @NonNull Collection<Locale> readLocalesFromJar() {
+        Set<Locale> locales = new HashSet<>();
         locales.add(Locale.of("en", "US"));
 
         try {
             URL root = Plugin.class.getResource("");
-            if (root == null) {
-                return locales;
-            }
+            if (root == null) return locales;
 
-            try (final FileSystem fs = FileSystems.newFileSystem(root.toURI(), Collections.emptyMap()); Stream<Path> stream  = Files.list(fs.getRootDirectories().iterator().next().resolve("/lang"))) {
+            try (FileSystem fs = FileSystems.newFileSystem(root.toURI(), Collections.emptyMap()); Stream<Path> stream  = Files.list(fs.getRootDirectories().iterator().next().resolve("/lang"))) {
                 stream.map(path -> path.getFileName().toString())
                         .filter(fileName -> fileName.startsWith("Bundle_") && fileName.endsWith(".properties"))
                         .map(fileName -> fileName.substring("Bundle_".length(), fileName.lastIndexOf(".")).split("_")) // assumes all bundle files contain both a language + country
