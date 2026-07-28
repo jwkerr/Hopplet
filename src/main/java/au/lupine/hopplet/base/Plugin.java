@@ -4,7 +4,6 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslationStore;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -102,8 +101,7 @@ public abstract class Plugin extends JavaPlugin {
                     .getBundle(
                         "lang.Bundle",
                         locale,
-                        getClassLoader(),
-                        UTF8ResourceBundleControl.utf8ResourceBundleControl()
+                        getClassLoader()
                     );
 
                 store.registerAll(locale, bundle, false);
