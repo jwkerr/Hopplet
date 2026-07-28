@@ -111,6 +111,7 @@ public interface Function<ArgumentType> {
             registered.add(function.key().asString());
         }
 
+        if (registered.isEmpty()) return;
         Hopplet.instance().getLogger().info("Registering functions: " + String.join(", ", registered));
     }
 
@@ -131,6 +132,7 @@ public interface Function<ArgumentType> {
             unregistered.add(function.key().asString());
         }
 
+        if (unregistered.isEmpty()) return;
         Hopplet.instance().getLogger().info("Unregistering functions: " + String.join(", ", unregistered));
     }
 
